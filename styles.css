@@ -1,0 +1,1054 @@
+/* ============================================================
+   PROJECT 713: THE NEDRY AUDIT
+   Visual Design — Matched to Reference Screenshots
+   ============================================================ */
+
+/* --- CSS Variables --- */
+:root {
+    /* Reference Image 1: Dark teal desktop background */
+    --desktop-bg: #1a2e2e;
+    --desktop-bg-light: #213838;
+    --desktop-bg-gradient: linear-gradient(135deg, #0f1f1f 0%, #1a2e2e 40%, #1f3535 100%);
+    
+    /* CRT Green palette */
+    --crt-green: #33ff33;
+    --crt-green-bright: #55ff55;
+    --crt-green-dim: #1a8c1a;
+    --crt-green-dark: #0d4d0d;
+    --crt-green-muted: #2a9e2a;
+    
+    /* Accent colors */
+    --crt-amber: #ffb000;
+    --crt-amber-dim: #996a00;
+    --crt-red: #ff3333;
+    --crt-cyan: #00cccc;
+    --crt-cyan-dim: #008888;
+    --crt-white: #ccddcc;
+    --crt-yellow: #e8c840;
+    
+    /* Window chrome — from Image 1 title bars */
+    --titlebar-teal: linear-gradient(180deg, #2a6666 0%, #1a4444 100%);
+    --titlebar-dark: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+    --titlebar-navy: linear-gradient(180deg, #2a3a5a 0%, #1a2a3a 100%);
+    
+    /* Explorer — from Image 1 (light background) */
+    --explorer-bg: #d8d8d0;
+    --explorer-border: #a8a8a0;
+    --explorer-text: #222222;
+    
+    /* Panels */
+    --bg-dark: #0a0e0e;
+    --bg-panel: #111818;
+    --bg-window: #0d120d;
+    --border-green: #1a5c1a;
+    --border-bright: #33aa33;
+    --border-teal: #2a6666;
+    
+    /* Taskbar — from Image 1 (dark with slight teal) */
+    --taskbar-bg: #0e1a1a;
+    --taskbar-border: #2a6666;
+    
+    /* Fonts */
+    --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+    --font-terminal: 'VT323', 'Courier New', monospace;
+    --font-ui: 'Source Code Pro', 'Courier New', monospace;
+    
+    /* Effects */
+    --phosphor-glow: 0 0 4px rgba(51, 255, 51, 0.4), 0 0 8px rgba(51, 255, 51, 0.15);
+    --phosphor-glow-amber: 0 0 4px rgba(255, 176, 0, 0.4), 0 0 8px rgba(255, 176, 0, 0.15);
+}
+
+/* --- Reset & Base --- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: var(--font-mono);
+    color: var(--crt-green);
+    cursor: default;
+    user-select: none;
+}
+
+.hidden { display: none !important; }
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #1a5c1a; border: 1px solid #1a5c1a; }
+::-webkit-scrollbar-thumb:hover { background: #33aa33; }
+
+/* ============================================================
+   CRT OVERLAY — Scanlines + Vignette
+   ============================================================ */
+#crt-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 10000;
+    background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px
+    );
+    animation: crt-flicker 0.1s infinite alternate;
+}
+
+#crt-overlay::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+@keyframes crt-flicker { 0% { opacity: 0.97; } 100% { opacity: 1; } }
+
+/* ============================================================
+   LOGIN SCREEN — Matched to Image 3
+   ============================================================ */
+#login-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #0a0a0a;
+    /* Faint vertical scanlines from Image 3 */
+    background-image: repeating-linear-gradient(
+        90deg, transparent, transparent 3px,
+        rgba(51, 255, 51, 0.015) 3px, rgba(51, 255, 51, 0.015) 4px
+    );
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9000;
+}
+
+#login-content {
+    text-align: center;
+    width: 100%;
+    max-width: 660px;
+}
+
+#login-logo-container {
+    width: 240px; height: 240px;
+    margin: 0 auto 25px;
+    background: #888888;
+    background: linear-gradient(135deg, #999 0%, #777 50%, #888 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 15px;
+}
+
+#login-logo {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    filter: grayscale(100%) contrast(1.1);
+    opacity: 0.9;
+}
+
+#login-title {
+    font-family: var(--font-terminal);
+    font-size: 38px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+#login-version {
+    font-family: var(--font-terminal);
+    font-size: 18px;
+    color: var(--crt-green-dim);
+    letter-spacing: 3px;
+    margin-bottom: 40px;
+}
+
+#login-form {
+    border: 2px dashed var(--crt-green-dim);
+    padding: 35px 50px;
+    margin: 0 auto 30px;
+    max-width: 500px;
+}
+
+.login-field {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    font-family: var(--font-terminal);
+    font-size: 18px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.login-field input {
+    width: 100%;
+    height: 38px;
+    background: #e8e8e0;
+    border: 2px solid #4488cc;
+    outline: none;
+    font-family: var(--font-terminal);
+    font-size: 18px;
+    color: #222;
+    padding: 4px 8px;
+}
+
+.login-field input[type="password"] {
+    border-color: #888;
+    background: #d8d8d0;
+}
+
+#login-btn {
+    font-family: var(--font-terminal);
+    font-size: 20px;
+    color: #0a0a0a;
+    background: var(--crt-green);
+    border: 2px solid var(--crt-green-dim);
+    padding: 8px 40px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    margin-top: 10px;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+#login-btn:hover {
+    background: var(--crt-green-bright);
+    box-shadow: 0 0 15px rgba(51, 255, 51, 0.4);
+}
+
+#login-warning {
+    font-family: var(--font-terminal);
+    font-size: 18px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+#login-alert {
+    font-family: var(--font-terminal);
+    font-size: 14px;
+    color: var(--crt-green-dim);
+    letter-spacing: 2px;
+}
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+#boot-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-dark);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9000;
+}
+
+#boot-content { width: 70%; max-width: 800px; }
+
+#boot-text {
+    font-family: var(--font-terminal);
+    font-size: 16px; color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    line-height: 1.6; white-space: pre-wrap; min-height: 300px;
+}
+
+#boot-progress-bar {
+    margin-top: 20px; height: 8px;
+    background: var(--bg-panel); border: 1px solid var(--border-green);
+    overflow: hidden;
+}
+
+#boot-progress-fill {
+    height: 100%; width: 0%;
+    background: var(--crt-green);
+    box-shadow: var(--phosphor-glow);
+    transition: width 0.3s ease;
+}
+
+/* ============================================================
+   MAGIC WORD — Small popup in bottom-right (Image 1)
+   ============================================================ */
+#magic-word-popup {
+    position: fixed;
+    bottom: 40px; right: 10px;
+    width: 240px;
+    z-index: 9500;
+    border: 2px solid var(--crt-amber);
+    background: var(--bg-dark);
+    box-shadow: 0 0 20px rgba(255, 176, 0, 0.3), 2px 2px 0 rgba(0,0,0,0.5);
+    animation: popup-shake 0.15s ease-in-out infinite;
+}
+
+#magic-word-header {
+    background: var(--crt-amber);
+    color: #000;
+    font-family: var(--font-terminal);
+    font-size: 13px;
+    padding: 3px 8px;
+    display: flex; align-items: center; gap: 6px;
+    font-weight: bold;
+}
+
+.magic-word-icon {
+    font-size: 14px;
+}
+
+#magic-word-body {
+    padding: 10px;
+    text-align: center;
+}
+
+#magic-word-text {
+    font-family: var(--font-terminal);
+    font-size: 15px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    line-height: 1.3;
+}
+
+#lockout-timer {
+    font-family: var(--font-terminal);
+    font-size: 13px;
+    color: var(--crt-amber);
+    margin-top: 6px;
+}
+
+@keyframes popup-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* ============================================================
+   DECODE PUZZLE
+   ============================================================ */
+#decode-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9500;
+}
+
+#decode-content {
+    width: 85%; max-width: 1000px;
+    border: 1px solid var(--border-bright); background: var(--bg-dark); padding: 20px;
+}
+
+#decode-header {
+    font-family: var(--font-terminal); font-size: 18px;
+    color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber);
+    text-align: center; margin-bottom: 20px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border-green);
+}
+
+#decode-streams { display: flex; gap: 10px; margin-bottom: 15px; height: 350px; }
+
+.decode-stream {
+    flex: 1; border: 1px solid var(--border-green);
+    background: var(--bg-panel); overflow: hidden;
+}
+
+.stream-label {
+    font-family: var(--font-terminal); font-size: 12px;
+    color: var(--crt-amber); background: rgba(26, 68, 68, 0.5);
+    padding: 4px 8px; border-bottom: 1px solid var(--border-green);
+}
+
+.decode-stream pre {
+    font-family: var(--font-terminal); font-size: 13px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    padding: 8px; line-height: 1.5; height: calc(100% - 28px); overflow-y: auto;
+}
+
+#decode-align-indicator {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    min-width: 120px; gap: 10px;
+}
+
+#decode-status {
+    font-family: var(--font-terminal); font-size: 16px;
+    color: var(--crt-red); text-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+    padding: 6px 12px; border: 1px solid var(--crt-red);
+}
+
+#decode-status.aligned {
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    border-color: var(--crt-green);
+}
+
+#decode-offset { font-family: var(--font-terminal); font-size: 14px; color: var(--crt-amber); }
+
+#decode-controls {
+    font-family: var(--font-terminal); font-size: 14px;
+    color: var(--crt-green-dim); text-align: center;
+    padding: 10px; border-top: 1px solid var(--border-green);
+}
+
+#decode-result {
+    font-family: var(--font-terminal); font-size: 14px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    padding: 15px; margin-top: 10px;
+    border: 1px solid var(--border-bright); background: var(--bg-panel);
+}
+
+/* ============================================================
+   DESKTOP — Dark teal background (Image 1)
+   ============================================================ */
+#desktop {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--desktop-bg);
+    background: var(--desktop-bg-gradient);
+}
+
+/* JP Logo watermark — centered, translucent (Image 1) */
+#desktop-watermark {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#watermark-logo {
+    width: 350px; height: 350px;
+    object-fit: contain;
+    filter: grayscale(100%) brightness(1.5);
+}
+
+/* ============================================================
+   DESKTOP ICONS — Matched to Image 1
+   ============================================================ */
+#desktop-icons {
+    position: absolute;
+    top: 15px; left: 15px;
+    display: flex; flex-direction: column;
+    gap: 10px; z-index: 1;
+}
+
+.desktop-icon {
+    display: flex; flex-direction: column;
+    align-items: center; width: 80px;
+    padding: 6px 4px; cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.desktop-icon:hover {
+    background: rgba(51, 255, 51, 0.08);
+    border-color: rgba(51, 255, 51, 0.2);
+}
+
+.desktop-icon span {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    margin-top: 4px; text-align: center;
+}
+
+/* Icon graphics — matching Image 1 colors */
+.icon-img {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+}
+
+/* Yellow folder icon (Image 1: Island_Map) */
+.icon-folder-yellow {
+    background: var(--crt-yellow);
+    border: 2px solid #b8a030;
+    clip-path: polygon(0 18%, 45% 18%, 55% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Blue circle icon (Image 1: System_Comp) */
+.icon-system {
+    width: 44px; height: 44px;
+    border: 3px solid #4488cc;
+    border-radius: 50%;
+    background: transparent;
+}
+
+/* Red alert icon (Image 1: Security_Log) */
+.icon-alert-red {
+    width: 44px; height: 44px;
+    border: 3px solid var(--crt-red);
+    background: var(--crt-red);
+    display: flex; align-items: center; justify-content: center;
+}
+
+.icon-alert-red::after {
+    content: '!';
+    font-family: var(--font-terminal);
+    font-size: 28px; font-weight: bold;
+    color: #fff;
+}
+
+/* ============================================================
+   WINDOW SYSTEM — IRIX style (Image 1 & 2)
+   ============================================================ */
+.irix-window {
+    position: absolute;
+    min-width: 200px; min-height: 100px;
+    background: var(--bg-window);
+    border: 1px solid var(--border-teal);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+    display: flex; flex-direction: column;
+    z-index: 100;
+}
+
+.irix-window.focused {
+    border-color: var(--crt-green-muted);
+    box-shadow: 0 0 10px rgba(51, 255, 51, 0.1), 3px 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Teal gradient title bar (Image 1: Explorer window) */
+.window-titlebar {
+    display: flex; align-items: center;
+    background: var(--titlebar-teal);
+    border-bottom: 1px solid var(--border-teal);
+    padding: 2px 6px; cursor: move;
+    height: 26px; flex-shrink: 0;
+}
+
+/* Dark title bar variant (Image 1: Terminal window) */
+.window-titlebar.dark {
+    background: var(--titlebar-dark);
+    border-bottom-color: #444;
+}
+
+/* Navy title bar variant (Image 2: File Navigator) */
+.window-titlebar.navy {
+    background: var(--titlebar-navy);
+    border-bottom-color: #2a3a5a;
+}
+
+.window-titlebar-icon {
+    width: 16px; height: 16px;
+    margin-right: 6px;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--crt-green);
+}
+
+.window-title {
+    flex: 1;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+
+.window-controls { display: flex; gap: 3px; }
+
+.window-btn {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border-teal);
+    background: rgba(0,0,0,0.3);
+    color: var(--crt-green);
+    font-family: var(--font-terminal); font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0; line-height: 1;
+}
+
+.window-btn:hover {
+    background: rgba(51, 255, 51, 0.1);
+    border-color: var(--crt-green);
+}
+
+.window-body {
+    flex: 1; overflow: auto; padding: 0; position: relative;
+}
+
+/* Explorer windows need light background to match Image 1 */
+.irix-window[data-type="explorer"] .window-body {
+    background: #e8e8e0;
+}
+
+/* ============================================================
+   TERMINAL — Green-on-dark (Image 1)
+   ============================================================ */
+.terminal-body {
+    padding: 8px;
+    font-family: var(--font-terminal); font-size: 15px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    line-height: 1.4; cursor: text;
+    height: 100%; overflow-y: auto;
+    background: var(--bg-dark);
+}
+
+.terminal-output { white-space: pre-wrap; word-wrap: break-word; }
+
+.terminal-input-line { display: flex; align-items: center; }
+
+.terminal-prompt {
+    color: var(--crt-green); white-space: nowrap; margin-right: 4px;
+}
+
+.terminal-input {
+    background: transparent; border: none; outline: none;
+    font-family: var(--font-terminal); font-size: 15px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    flex: 1; caret-color: var(--crt-green);
+}
+
+@keyframes cursor-blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+.output-error { color: var(--crt-red); }
+.output-warning { color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber); }
+.output-info { color: var(--crt-cyan); }
+.output-success { color: var(--crt-green); }
+.output-dim { color: var(--crt-green-dim); }
+.output-header { color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber); }
+
+/* ============================================================
+   EXPLORER — Image 1: light gray bg, yellow 3D folder icons
+   Uses .exp-* class prefix
+   ============================================================ */
+.exp-pathbar {
+    display: flex; align-items: center;
+    background: #c8c8c0;
+    border-bottom: 2px solid #a8a8a0;
+    padding: 3px 8px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: #222; gap: 6px;
+}
+
+.exp-pathbar-up {
+    cursor: pointer; color: #222;
+    font-size: 12px; padding: 1px 6px;
+    border: 1px solid #aaa; background: #e0e0d8;
+    font-family: var(--font-mono);
+}
+.exp-pathbar-up:hover { background: #f0f0e8; }
+
+.exp-pathbar-text { color: #222; }
+
+/* Image 1: white/light gray content area with folder grid */
+.exp-content {
+    background: #e8e8e0;
+    padding: 20px 15px;
+    display: flex; flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 8px;
+    overflow-y: auto; height: calc(100% - 28px);
+}
+
+.exp-empty {
+    padding: 20px; color: #888;
+    font-family: var(--font-mono); font-size: 12px;
+}
+
+/* Each folder/file item — grid layout like Image 1 */
+.exp-item {
+    display: flex; flex-direction: column;
+    align-items: center; width: 90px;
+    padding: 8px 4px; cursor: pointer;
+    border: 1px solid transparent; border-radius: 2px;
+}
+.exp-item:hover {
+    background: rgba(0, 80, 180, 0.12);
+    border-color: #8888cc;
+}
+
+/* Yellow 3D folder icon — simpler approach for reliability */
+.exp-folder-icon {
+    width: 54px; height: 36px;
+    background: linear-gradient(180deg, #f0d050 0%, #d8b828 50%, #c8a818 100%);
+    border: 2px solid #a89020;
+    border-radius: 0 2px 2px 2px;
+    position: relative;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.25);
+}
+/* Folder tab */
+.exp-folder-icon::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: 0;
+    width: 22px; height: 8px;
+    background: #e8c840;
+    border: 2px solid #a89020;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+}
+
+/* File/document icon — simple page with corner fold */
+.exp-file-icon {
+    width: 38px; height: 44px;
+    background: #f8f8f0;
+    border: 2px solid #999;
+    position: relative;
+}
+.exp-file-icon::before {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent #ccc transparent transparent;
+}
+.exp-file-icon::after {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 10px; height: 10px;
+    background: #e8e8e0;
+    border-left: 1px solid #999;
+    border-bottom: 1px solid #999;
+}
+
+.exp-label {
+    font-family: var(--font-mono); font-size: 11px;
+    color: #222; text-align: center;
+    word-break: break-all; margin-top: 4px; line-height: 1.2;
+}
+
+/* ============================================================
+   FILE NAVIGATOR — Image 2: exact pixel match
+   Navy title bar, gray menu bar, toolbar, sidebar, doc viewer, status bar
+   Uses .fn-* class prefix
+   ============================================================ */
+
+/* Menu bar — gray bar with underlined menu items (Image 2) */
+.fn-menubar {
+    display: flex; align-items: center;
+    background: #c0c0b8;
+    border-bottom: 1px solid #999;
+    padding: 2px 0; flex-shrink: 0;
+    font-family: var(--font-ui); font-size: 13px;
+}
+.fn-menu-item {
+    padding: 2px 14px; color: #222; cursor: default;
+}
+.fn-menu-item u { text-decoration: underline; }
+.fn-menu-item:hover {
+    background: #1a3a5a; color: #fff;
+}
+
+/* Toolbar — light gray bar with Up button and search (Image 2) */
+.fn-toolbar {
+    display: flex; align-items: center;
+    background: #d0d0c8;
+    border-bottom: 1px solid #aaa;
+    padding: 3px 8px; gap: 8px; flex-shrink: 0;
+}
+.fn-toolbar-btn {
+    font-family: var(--font-mono); font-size: 12px;
+    background: #e0e0d8; border: 1px outset #ccc;
+    padding: 2px 10px; color: #222; cursor: default;
+}
+.fn-toolbar-btn:hover { background: #f0f0e8; }
+.fn-searchbar {
+    flex: 1; display: flex; align-items: center;
+    background: #fff; border: 1px solid #888;
+    padding: 1px 4px; gap: 4px;
+}
+.fn-search-icon { font-size: 12px; }
+.fn-search-input {
+    flex: 1; border: none; outline: none;
+    font-family: var(--font-mono); font-size: 12px;
+    color: #222; background: transparent;
+}
+
+/* Main body — sidebar + doc area (Image 2) */
+.fn-main {
+    display: flex; flex: 1; overflow: hidden;
+}
+
+/* Left sidebar — folder tree with yellow folder icons (Image 2) */
+.fn-sidebar {
+    width: 140px; flex-shrink: 0;
+    background: #d8d8d0;
+    border-right: 1px solid #aaa;
+    overflow-y: auto; padding: 2px 0;
+    font-family: var(--font-mono); font-size: 12px;
+}
+.fn-sidebar-item {
+    display: flex; align-items: center;
+    padding: 2px 4px; cursor: pointer;
+    color: #222; gap: 3px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+}
+.fn-sidebar-item:hover { background: #c0c0b8; }
+.fn-sidebar-item.active {
+    background: #1a3a5a; color: #fff;
+}
+.fn-sidebar-child { padding-left: 16px; }
+.fn-sidebar-root { font-weight: bold; }
+.fn-sidebar-icon { font-size: 11px; width: 16px; text-align: center; flex-shrink: 0; }
+
+/* Document area (Image 2) */
+.fn-doc-area {
+    flex: 1; display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.fn-doc-header {
+    display: flex; justify-content: space-between;
+    background: #2a3a5a; color: #8899aa;
+    font-family: var(--font-mono); font-size: 11px;
+    padding: 3px 8px; border-bottom: 1px solid #1a2a3a;
+    flex-shrink: 0;
+}
+
+/* Document content — Image 2: dark blue-black bg, green text */
+.fn-doc-content {
+    flex: 1; overflow-y: auto;
+    background: #0c1820;
+    padding: 15px;
+    font-family: var(--font-terminal); font-size: 14px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;
+}
+
+/* Green cursor block at bottom (Image 2) */
+.fn-doc-content::after {
+    content: '█';
+    color: var(--crt-green); animation: cursor-blink 1s infinite;
+}
+
+/* Status bar — gray bar at bottom (Image 2) */
+.fn-statusbar {
+    display: flex; align-items: center;
+    background: #c0c0b8;
+    border-top: 1px solid #999;
+    font-family: var(--font-mono); font-size: 11px;
+    color: #222; flex-shrink: 0; height: 20px;
+}
+.fn-status-cell {
+    padding: 0 10px;
+    border-right: 1px solid #999;
+    height: 100%; display: flex; align-items: center;
+}
+.fn-status-cell:last-child { border-right: none; }
+.fn-status-flex { flex: 1; }
+.fn-status-green { color: #c88030; }
+
+/* Classified tag (Image 2: green bordered box) */
+.doc-classified {
+    color: var(--crt-green); font-weight: bold;
+    background: rgba(51, 255, 51, 0.08);
+    border: 1px solid var(--crt-green);
+    padding: 3px 10px; display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* ============================================================
+   CAMERA FEED — Image 1: top-right, actual camera image
+   Uses .cam-* class prefix
+   ============================================================ */
+.cam-body {
+    height: 100%; position: relative;
+    background: #111; overflow: hidden;
+}
+.cam-image {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: grayscale(40%) contrast(1.1) brightness(0.8);
+    opacity: 0.85;
+}
+/* Scanline overlay on camera */
+.cam-body::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px
+    );
+    z-index: 2;
+}
+.cam-rec {
+    position: absolute; top: 6px; right: 8px;
+    font-family: var(--font-terminal); font-size: 12px;
+    color: var(--crt-red); text-shadow: 0 0 4px rgba(255,50,50,0.6);
+    z-index: 3;
+    animation: rec-blink 1s infinite;
+}
+@keyframes rec-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }
+
+/* Green border at bottom of camera (Image 1 shows thin green line) */
+.cam-body::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--crt-green); z-index: 3;
+}
+
+/* ============================================================
+   TELEMETRY
+   ============================================================ */
+.telemetry-body {
+    padding: 0; font-family: var(--font-terminal); font-size: 13px;
+    height: 100%; display: flex; flex-direction: column;
+    background: var(--bg-dark);
+}
+
+.telemetry-header {
+    background: rgba(26, 68, 68, 0.5);
+    color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber);
+    padding: 4px 8px; font-size: 11px;
+    border-bottom: 1px solid var(--border-teal);
+    text-transform: uppercase; letter-spacing: 1px;
+}
+
+.telemetry-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--border-teal); flex: 1; overflow-y: auto;
+}
+
+.telemetry-cell { background: var(--bg-panel); padding: 8px; }
+
+.telemetry-label {
+    font-size: 10px; color: var(--crt-green-dim);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+}
+
+.telemetry-value {
+    font-size: 20px; color: var(--crt-green); text-shadow: var(--phosphor-glow);
+}
+
+.telemetry-value.warning { color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber); }
+
+.telemetry-value.critical {
+    color: var(--crt-red);
+    text-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+    animation: critical-pulse 1s infinite;
+}
+
+@keyframes critical-pulse { 0%, 70% { opacity: 1; } 71%, 100% { opacity: 0.4; } }
+
+.telemetry-paddock-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 4px; padding: 8px;
+}
+
+.paddock-cell {
+    background: var(--bg-dark); border: 1px solid var(--border-teal);
+    padding: 4px; font-size: 9px; text-align: center;
+}
+
+.paddock-cell.active { border-color: var(--crt-green); }
+
+.paddock-cell.breach {
+    border-color: var(--crt-red); color: var(--crt-red);
+    animation: critical-pulse 1s infinite;
+}
+
+.paddock-cell .paddock-name { color: var(--crt-green-dim); font-size: 8px; }
+.paddock-cell .paddock-status { color: var(--crt-green); font-size: 10px; margin-top: 2px; }
+
+.telemetry-feed {
+    border-top: 1px solid var(--border-teal);
+    background: var(--bg-dark); padding: 6px 8px;
+    height: 120px; overflow-y: auto;
+    font-size: 11px; color: var(--crt-green-dim); line-height: 1.4;
+}
+
+.feed-entry { margin-bottom: 2px; }
+.feed-timestamp { color: var(--crt-amber); margin-right: 6px; }
+
+/* ============================================================
+   TASKBAR — Image 1 style
+   ============================================================ */
+#taskbar {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    background: var(--taskbar-bg);
+    border-top: 1px solid var(--taskbar-border);
+    display: flex; align-items: center;
+    z-index: 5000;
+}
+
+#taskbar-start {
+    padding: 0 4px;
+    border-right: 1px solid var(--border-teal);
+    height: 100%; display: flex; align-items: center;
+}
+
+#start-button {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    padding: 2px 10px; cursor: pointer;
+    border: 1px solid var(--border-teal);
+    background: var(--bg-panel);
+}
+
+#start-button:hover { background: rgba(42, 102, 102, 0.3); }
+
+#taskbar-tabs {
+    flex: 1; display: flex; align-items: center;
+    gap: 2px; padding: 0 4px; overflow-x: auto;
+}
+
+.taskbar-tab {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--crt-green-dim);
+    padding: 3px 12px;
+    border: 1px solid var(--border-teal);
+    background: var(--bg-panel);
+    cursor: pointer; white-space: nowrap;
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+}
+
+.taskbar-tab:hover { color: var(--crt-green); border-color: var(--crt-green-dim); }
+
+.taskbar-tab.active {
+    color: var(--crt-green); background: rgba(42, 102, 102, 0.3);
+    border-color: var(--crt-green-muted); text-shadow: var(--phosphor-glow);
+}
+
+#taskbar-clock {
+    font-family: var(--font-terminal); font-size: 14px;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    padding: 0 12px;
+    border-left: 1px solid var(--border-teal);
+    height: 100%; display: flex; align-items: center;
+}
+
+/* ============================================================
+   LEDGER
+   ============================================================ */
+.ledger-body { display: flex; flex-direction: column; height: 100%; }
+
+.ledger-toolbar {
+    display: flex; gap: 4px; padding: 4px 8px;
+    background: rgba(26, 68, 68, 0.5);
+    border-bottom: 1px solid var(--border-teal);
+}
+
+.ledger-btn {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--crt-green); background: var(--bg-dark);
+    border: 1px solid var(--border-teal);
+    padding: 2px 10px; cursor: pointer;
+}
+
+.ledger-btn:hover { background: rgba(42, 102, 102, 0.3); }
+
+.ledger-textarea {
+    flex: 1; background: var(--bg-dark); border: none; outline: none;
+    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    font-family: var(--font-terminal); font-size: 14px;
+    padding: 10px; resize: none; line-height: 1.5;
+}
+
+/* ============================================================
+   SUBMIT AUDIT
+   ============================================================ */
+.audit-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92); z-index: 9600;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.audit-content { width: 70%; max-width: 700px; font-family: var(--font-terminal); }
+
+.audit-content pre {
+    font-size: 14px; color: var(--crt-green);
+    text-shadow: var(--phosphor-glow); line-height: 1.5; white-space: pre-wrap;
+}
+
+.audit-content .corporate-text {
+    color: var(--crt-red); text-shadow: 0 0 6px rgba(255, 50, 50, 0.3);
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.text-amber { color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber); }
+.text-red { color: var(--crt-red); }
+.text-cyan { color: var(--crt-cyan); }
+.text-dim { color: var(--crt-green-dim); }
+.text-green { color: var(--crt-green); text-shadow: var(--phosphor-glow); }
+
+::selection { background: rgba(51, 255, 51, 0.3); color: var(--crt-green); }

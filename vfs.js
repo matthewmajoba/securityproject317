@@ -1,0 +1,1415 @@
+/* ============================================================
+   VIRTUAL FILE SYSTEM — 50+ Interconnected Lore Files
+   Project 713: The Nedry Audit
+   ============================================================ */
+
+const VFS = (() => {
+    // File types
+    const DIR = 'dir';
+    const FILE = 'file';
+
+    // Evidence flags
+    const EVIDENCE = {
+        LYSINE: 'lysine_failure',
+        BREEDING: 'breeding_evidence',
+        SITE_B: 'site_b_location',
+        BACKDOOR: 'nedry_backdoor',
+        BIOSYN: 'biosyn_wire'
+    };
+
+    // Build the tree
+    const fs = {
+        type: DIR, children: {
+            sys: { type: DIR, children: {
+                park: { type: DIR, children: {
+                    Control: { type: DIR, children: {
+                        'tour_program.vax': { type: FILE, modified: '06/01/1993 10:00', size: '12.4K', content:
+`TOUR PROGRAM — JURASSIC PARK
+Version: 2.1.4
+Author: D. Nedry (InGen Systems)
+
+Module: Automated Tour Vehicle Control
+Status: OPERATIONAL (pending update)
+
+This program controls the electric rail-guided
+Explorer vehicles along the 32-mile tour route.
+
+Route Checkpoints:
+  01 — Main Gate
+  02 — Dilophosaurus Paddock
+  03 — Triceratops Paddock
+  04 — T-Rex Paddock (Speed limit enforced)
+  05 — Brachiosaur Lake
+  06 — Gallimimus Run
+  07 — Return to Visitor Center
+
+NOTE: Nedry has not delivered the v2.2 update.
+The system still runs on the original GPS module
+which has a ±3m drift in heavy rain.` }
+                    }},
+                    Fences: { type: DIR, children: {
+                        'perimeter_fence_control.sys': { type: FILE, modified: '06/11/1993 22:00', size: '8.1K', content:
+`PERIMETER FENCE CONTROL SYSTEM
+Version: 3.0.1 | InGen Security Division
+
+CIRCUIT MAP:
+  Circuit 01-A..D — Visitor Area (2,000V)
+  Circuit 02-A..D — Herbivore North (5,000V)
+  Circuit 03-A..D — Herbivore South (5,000V)
+  Circuit 04-A..D — Dilophosaurus (7,500V)
+  Circuit 05-A..D — Gallimimus (5,000V)
+  Circuit 06-A..D — Stegosaurus (3,000V)
+  Circuit 07-A..D — Raptor (10,000V) *MAXIMUM*
+  Circuit 08-A..D — T-Rex (10,000V) *MAXIMUM*
+
+OVERRIDE CAPABILITY:
+  Individual circuits can be disabled from
+  the main control terminal (NEDRY-WS01).
+  
+  WARNING: Emergency override disables ALL
+  circuits simultaneously. This is by design
+  per J. Hammond's directive to facilitate
+  emergency evacuations.
+  
+  NOTE: There is no selective emergency mode.
+  It's all or nothing. — R. Arnold` }
+                    }},
+                    Power: { type: DIR, children: {
+                        'main_grid.sys': { type: FILE, modified: '06/11/1993 18:00', size: '3.2K', content:
+`MAIN POWER GRID — ISLA NUBLAR
+Status: OPERATIONAL
+Primary Source: Geothermal Plant (East Ridge)
+Backup: Diesel Generator Farm (x3)
+
+Grid Load: 68% capacity
+Peak Load (June avg): 74%
+
+CRITICAL SYSTEMS (Uninterruptible):
+  - Perimeter Fences
+  - Embryo Cold Storage
+  - Security Cameras
+  - Communications Array
+  - Control Room
+
+NON-CRITICAL (Shed-able):
+  - Visitor Center Lighting
+  - Tour Vehicle Rail
+  - HVAC (non-server)
+  - Landscape Irrigation
+
+Transfer Switch Status:
+  Gen #01: 4.2s (PASS)
+  Gen #02: 6.1s (PASS)
+  Gen #03: 12.2s (FAIL — exceeds 8s spec)` }
+                    }},
+                    'nedry.exe': { type: FILE, modified: '06/12/1993 00:32', size: '48K', content:
+`BINARY EXECUTABLE — nedry.exe
+[Cannot display binary content]
+
+File Header Analysis:
+  Format: SGI IRIX COFF Executable
+  Compiled: 06/05/1993 01:15
+  Compiler: MIPSpro C 7.1
+  
+  Linked Libraries:
+    libsec.so (security API)
+    libcam.so (camera control)
+    libfence.so (perimeter control)
+    libembry.so (embryo storage access)
+
+  >>> This executable bundles all of Nedry's
+  >>> bypass tools into a single launcher.
+  >>> Running this is what started everything.` },
+                    'white_rbt.obj': { type: FILE, modified: '06/05/1993 01:28', size: '156K', content:
+`BINARY OBJECT — white_rbt.obj (whiterabbit)
+[Cannot display binary content]
+
+Decompiled Pseudocode:
+  function main() {
+    // Phase 1: Cameras
+    cam_loop(sectors=[1,2,3,5,7,8,12]);
+    sleep(30);
+    
+    // Phase 2: Security
+    disable_motion_sensors(sectors=[14,19,22]);
+    disable_door_logs();
+    
+    // Phase 3: Access
+    unlock_embryo_storage();
+    unlock_east_dock_gate();
+    
+    // Phase 4: Fences (timed)
+    // "I'll be back in 18 minutes"
+    schedule_fence_shutdown(delay=900); // 15 min
+    
+    // Phase 5: Escape
+    // Drive to east dock
+    // Board boat
+    // Get paid
+  }
+
+  >>> "white_rbt.obj" = White Rabbit Object
+  >>> Named after the phrase on Nedry's screen:
+  >>> "WHTE_RBT.OBJ" — the trigger for the heist.` },
+                    maint: { type: DIR, children: {
+                        'EXP_9_SENSOR.LOG': { type: FILE, modified: '06/11/1993 14:22', size: '4.2K', content:
+`================================================================
+  JURASSIC PARK — MAINTENANCE TICKET #4471
+  ASSET: Explorer Vehicle 09
+  LOCATION: Paddock 4 (Dilophosaurus Enclosure)
+  DATE: 06/11/1993  TECH: R. Martinez
+================================================================
+
+ISSUE: Proximity Sensor Failure — Intermittent False Positives
+
+DESCRIPTION:
+  Explorer 09 has logged 14 "Ghost Obstacle" events over the
+  past 48 hours while the vehicle was STATIONARY in the
+  maintenance bay adjacent to Paddock 4.
+
+SENSOR LOG EXTRACT:
+  [06/10 02:14:08] PROX_ALERT: Object detected — 0.8m — FRONT
+  [06/10 02:14:09] PROX_ALERT: Object cleared
+  [06/10 02:17:33] PROX_ALERT: Object detected — 0.6m — FRONT
+  [06/10 02:17:34] PROX_ALERT: Object detected — 0.4m — FRONT
+  [06/10 02:17:35] PROX_ALERT: Object cleared
+  [06/10 03:45:12] PROX_ALERT: Object detected — 1.2m — LEFT
+  [06/10 03:45:12] PROX_ALERT: Object cleared
+  [06/10 03:45:13] PROX_ALERT: Object detected — 0.3m — LEFT
+  ...
+  [TOTAL GHOST OBSTACLES: 14]
+
+DIAGNOSIS:
+  Sensor hardware tested — PASS. Wiring tested — PASS.
+  All 14 events occurred between 0200h-0500h.
+  No maintenance personnel present during those hours.
+
+  NOTE: Maintenance bay shares a fence line with Paddock 4.
+  Recommend checking if wildlife is triggering the sensors
+  through the fence mesh.
+
+  >>> AMENDED NOTE (R. Arnold): "Wildlife" doesn't stand
+  still for two minutes at a time. Check the Dilophosaur
+  activity logs — they've been observed standing motionless
+  near the fence for extended periods. Hunting behavior?
+  Motion sensors wouldn't flag a stationary animal. The
+  proximity sensors did. Think about that.
+
+STATUS: UNRESOLVED — Awaiting further analysis
+================================================================` },
+
+                        'GRID_STABILITY_07.LOG': { type: FILE, modified: '06/11/1993 09:15', size: '3.8K', content:
+`================================================================
+  JURASSIC PARK — POWER GRID STABILITY REPORT
+  SECTOR: 07 (Raptor Containment)
+  PERIOD: 06/01/1993 — 06/11/1993
+  ENGINEER: R. Arnold
+================================================================
+
+ANOMALY: Intermittent voltage drops detected on perimeter
+fence Circuit 07-A through 07-D.
+
+VOLTAGE LOG (Nominal: 10,000V):
+  Date       Time      Circuit   Reading   Drop
+  ─────────────────────────────────────────────────
+  06/02      04:12:08  07-B      9,999.5V  0.5V
+  06/03      04:08:33  07-C      9,999.5V  0.5V
+  06/04      04:15:01  07-B      9,999.4V  0.6V
+  06/05      04:11:47  07-A      9,999.5V  0.5V
+  06/06      04:09:22  07-D      9,999.5V  0.5V
+  06/07      04:14:55  07-B      9,999.5V  0.5V
+  06/08      04:12:11  07-C      9,999.4V  0.6V
+  06/09      04:10:38  07-A      9,999.5V  0.5V
+  06/10      04:13:29  07-B      9,999.5V  0.5V
+  06/11      04:11:02  07-D      9,999.5V  0.5V
+
+ANALYSIS:
+  Drops are consistent at 0.5V and occur exclusively
+  between 0400h-0415h. Pattern suggests a systematic
+  external load being briefly applied to the fence.
+
+  INITIAL ASSESSMENT: Minor grounding issues. Possibly
+  moisture on insulator posts during early morning
+  dew accumulation.
+
+  >>> PERSONAL NOTE (R. Arnold):
+  I don't like this. The drops cycle through ALL FOUR
+  circuits sequentially. That's not moisture. That's
+  something testing each section of fence in order.
+  Every night. Same time. They're learning the cycle.
+
+  Mentioned this to Muldoon. He didn't seem surprised.
+  Said he's been saying it for months. Nobody listens.
+
+STATUS: Monitoring — No action taken per Hammond directive
+================================================================` },
+
+                        'HVAC_CONTROL_ROOM.LOG': { type: FILE, modified: '06/10/1993 16:30', size: '1.2K', content:
+`HVAC SYSTEM — CONTROL ROOM
+Status: NOMINAL
+Temp: 68°F (20°C) | Humidity: 45%
+Server Rack Cooling: ACTIVE
+NOTE: Compressor #2 showing early wear.
+Parts on order — ETA 3 weeks from San José.
+Nedry complained about temperature again.
+Set his terminal zone to 66°F per request.` },
+
+                        'TOUR_VEHICLE_MAINT.LOG': { type: FILE, modified: '06/09/1993 11:00', size: '1.8K', content:
+`TOUR VEHICLE MAINTENANCE SCHEDULE
+══════════════════════════════════
+Vehicle  Status      Last Service  Next Due    Notes
+───────────────────────────────────────────────────────
+EXP-01   ACTIVE      06/01/1993    07/01/1993  OK
+EXP-02   ACTIVE      06/01/1993    07/01/1993  OK
+EXP-03   ACTIVE      05/28/1993    06/28/1993  OK
+EXP-04   ACTIVE      06/05/1993    07/05/1993  OK
+EXP-05   ACTIVE      06/03/1993    07/03/1993  Tire wear
+EXP-06   RESERVE     05/15/1993    —           GPS offline
+EXP-07   ACTIVE      06/07/1993    07/07/1993  OK
+EXP-08   ACTIVE      06/02/1993    07/02/1993  OK
+EXP-09   MAINTENANCE 06/11/1993    —           See #4471
+EXP-10   RESERVE     04/20/1993    —           Paint damage
+
+Track rail lubrication: Due 06/15/1993
+Tour program software: v2.1.4 — Update pending (Nedry)` },
+
+                        'GENERATOR_03.LOG': { type: FILE, modified: '06/10/1993 22:14', size: '1.1K', content:
+`GENERATOR #03 — BACKUP POWER UNIT
+Location: East Maintenance Compound
+Fuel Level: 78%
+Last Test Run: 06/08/1993 — PASS
+Auto-Start: ENABLED
+
+WARNING: Transfer switch response time measured
+at 12.2 seconds. Spec requires <8 seconds.
+Recommend immediate maintenance.
+
+NOTE (Arnold): If main power goes down, there
+will be a 12-second window where NOTHING is
+electrified. Hammond says the animals won't
+notice. Hammond hasn't met the raptors.`
+                        }
+                    }},
+                    sec: { type: DIR, children: {
+                        'RAP_01_DYNAMICS.TXT': { type: FILE, modified: '06/10/1993 19:45', size: '5.1K', content:
+`================================================================
+  JURASSIC PARK — BEHAVIORAL OBSERVATION LOG
+  SUBJECT: Velociraptor Pack — Paddock 12
+  OBSERVER: R. Muldoon, Park Warden
+  CLASSIFICATION: *** RESTRICTED ***
+================================================================
+
+SUBJECT DESIGNATION: "The Big One"
+  Species: Velociraptor antirrhopus nublarensis
+  Sex: Female | Est. Weight: 150kg | Length: 3.8m
+  Acquired: 02/1993 from Site B batch VR-08
+
+BEHAVIORAL OBSERVATIONS — JUNE 1993:
+
+06/03: The Big One killed subordinate VR-12 today.
+  Third kill this quarter. She didn't eat any of it.
+  Wu says it's "dominance behavior." It isn't.
+  She killed VR-12 directly in front of Camera 4.
+  While we were all watching the monitors, VR-09
+  was testing the fence at the feed gate.
+  It was a distraction.
+
+06/05: They've changed their feeding pattern. Used
+  to rush the gate when the feeders came. Now they
+  stay back. Watch. Wait. Then one approaches from
+  the side while two others position at the rear.
+  They're not hunting the cow. They're studying
+  the gate mechanism.
+
+06/08: Requested AGAIN that we install redundant
+  locks on all raptor enclosure gates. Hammond
+  denied — "too expensive, too ugly for the tour."
+  Filed formal objection.
+
+06/09: I've watched the tapes. When the cameras pan
+  away from the fence line (every 90 seconds on the
+  automated sweep), The Big One approaches the fence.
+  She's timed the camera rotation.
+
+06/10: The Big One has started making a new call.
+  Low, rhythmic. The others respond differently to
+  it than to her hunting calls. I think she's
+  giving orders.
+
+  Recommendation: Destroy all animals in Paddock 12
+  and start over with a new batch. They are too
+  intelligent and too coordinated.
+
+  Response from Hammond: "These animals are worth
+  more than you are, Robert."
+
+  God help us all.
+================================================================` },
+
+                        'CAM_LOOP_SOURCE.C': { type: FILE, modified: '06/12/1993 01:34', size: '2.3K', evidence: EVIDENCE.BACKDOOR, content:
+`/* ================================================
+ * cam_loop.c — Security Camera Feed Override
+ * Found in: /usr/nedry/bin/
+ * Last Modified: 06/12/1993 01:34
+ * ================================================
+ * THIS CODE WAS FOUND ON NEDRY'S WORKSTATION
+ * It feeds a 3-minute recorded loop to security
+ * monitors, masking real-time camera feeds.
+ * ================================================ */
+
+#include <stdio.h>
+#include <security/cam_api.h>
+#include <time.h>
+
+#define LOOP_DURATION_SEC  180  /* 3 minutes */
+#define BUFFER_FRAMES      5400 /* 30fps * 180s */
+
+static frame_t loop_buffer[BUFFER_FRAMES];
+static int loop_active = 0;
+
+int init_cam_loop(int cam_id) {
+    /* Record 3 minutes of "normal" footage */
+    printf("Recording baseline... ");
+    for (int i = 0; i < BUFFER_FRAMES; i++) {
+        loop_buffer[i] = cam_capture(cam_id);
+        usleep(33333); /* ~30fps */
+    }
+    printf("Done.\\n");
+    return 0;
+}
+
+int activate_loop(int cam_id) {
+    loop_active = 1;
+    int frame = 0;
+    while (loop_active) {
+        cam_override_feed(cam_id, loop_buffer[frame]);
+        frame = (frame + 1) % BUFFER_FRAMES;
+        usleep(33333);
+    }
+    return 0;
+}
+
+/* Called from whiterabbit.exe */
+void nedry_cam_bypass(void) {
+    int cams[] = {1, 2, 3, 5, 7, 8, 12};
+    for (int i = 0; i < 7; i++) {
+        init_cam_loop(cams[i]);
+        activate_loop(cams[i]);
+    }
+    /* Cameras 4, 6, 9, 10, 11 left active */
+    /* — nobody watches those sectors anyway */
+}` },
+
+                        'PERIMETER_BREACH_LOG.TXT': { type: FILE, modified: '06/12/1993 03:15', size: '1.4K', content:
+`PERIMETER SECURITY — BREACH EVENTS
+════════════════════════════════════
+Date       Time     Sector  Type          Status
+──────────────────────────────────────────────────
+06/12/93   00:15    EAST    Motion Alert  FALSE ALARM
+06/12/93   01:48    DOCK    Gate Open     AUTHORIZED (Nedry)
+06/12/93   02:01    DOCK    Gate Open     UNAUTHORIZED
+06/12/93   02:04    SOUTH   Fence Alarm   SYSTEM OFFLINE
+06/12/93   02:04    ALL     Fence Alarm   SYSTEM OFFLINE
+
+WARNING: Mass fence failure detected at 02:04.
+  All perimeter systems went offline simultaneously.
+  Cause: Unknown — power grid shows active.
+  Security override code detected in system log.
+  Override origin: Terminal NEDRY-WS01` },
+
+                        'MOTION_SENSOR_GRID.DAT': { type: FILE, modified: '06/11/1993 23:59', size: '0.8K', content:
+`MOTION SENSOR GRID — COVERAGE MAP
+Sectors: 24 active / 3 offline / 1 maintenance
+Total sensors: 340
+Active coverage: 92%
+
+OFFLINE SECTORS:
+  Sector 14 — East dock approach (sensor #221-228)
+    Status: Disabled by Nedry 06/10/93
+    Reason: "Calibration maintenance"
+  Sector 19 — North perimeter (sensor #301-308)
+    Status: Disabled by Nedry 06/10/93
+    Reason: "False positive reduction"
+  Sector 22 — Embryo storage approach (sensor #330-340)
+    Status: Disabled by Nedry 06/11/93
+    Reason: "Hardware failure"
+
+NOTE: All three disabled sectors form a clear
+path from the Control Room to the East Dock.`
+                        }
+                    }},
+                }},
+                logs: { type: DIR, children: {
+                    raw: { type: DIR, children: {
+                        'SENSE_COUNT.DAT': { type: FILE, modified: '06/12/1993 00:00', size: '0.4K', content:
+`ISLA NUBLAR — RAW SENSOR TELEMETRY
+════════════════════════════════════
+Automated Census (Motion + Thermal + Visual)
+Timestamp: 06/12/1993 00:00:00
+
+SENSE_COUNT=292
+
+Raw sensor hits by sector:
+  Paddock 01 (T-Rex):        1
+  Paddock 02 (Brachiosaur):  7
+  Paddock 03 (Triceratops):  4
+  Paddock 04 (Dilophosaur):  8
+  Paddock 05 (Gallimimus):  37
+  Paddock 06 (Parasaurolophus): 12
+  Paddock 07 (Stegosaurus):  6
+  Paddock 08 (Compy):       49
+  Paddock 09 (Pteranodon):  14
+  Paddock 10 (Herrerasaur):  3
+  Paddock 11 (Othnielia):   28
+  Paddock 12 (Raptor):       8
+  Free-Range/Uncontained:  115
+
+TOTAL: 292
+
+WARNING: Free-range count 115 exceeds manifest
+total of 238. Unaccounted specimens detected.` },
+                    }),
+                    'park_status.exe': { type: FILE, modified: '06/11/1993 22:00', size: '1.8K', content:
+`/* park_status.exe — Decompiled output
+ * InGen Park Management System v2.3
+ * Modified by: D. Nedry (06/02/1993)
+ * ──────────────────────────────────── */
+
+int get_animal_count(void) {
+    int count = raw_sensor_count();
+    int expected = manifest_count(); /* 238 */
+
+    /* NEDRY MODIFICATION — 06/02/1993 */
+    if (count > expected) {
+        count = expected;
+    }
+    /* END MODIFICATION */
+
+    return count;
+}
+
+/* Original code (commented out by Nedry):
+ *
+ * int get_animal_count(void) {
+ *     int count = raw_sensor_count();
+ *     if (count != manifest_count()) {
+ *         trigger_alert(ALERT_CENSUS_MISMATCH);
+ *         log_event("Census discrepancy detected");
+ *     }
+ *     return count;
+ * }
+ */` },
+                    'access_log.dat': { type: FILE, modified: '06/12/1993 02:30', size: '2.1K', content:
+`ACCESS LOG — NEDRY-WS01
+════════════════════════
+Date       Time     Action                    Duration
+──────────────────────────────────────────────────────
+06/02/93   23:14    Login:nedry               —
+06/02/93   23:16    Modified: park_status.exe  4m
+06/02/93   23:22    Accessed: /sys/root       DENIED
+06/02/93   23:23    Logout:nedry              —
+06/05/93   01:02    Login:nedry               —
+06/05/93   01:04    Compiled: cam_loop.c       8m
+06/05/93   01:15    Compiled: whiterabbit.obj  12m
+06/05/93   01:30    Logout:nedry              —
+06/08/93   22:45    Login:nedry               —
+06/08/93   22:47    Disabled: Sensor Sec.14    1m
+06/08/93   22:50    Disabled: Sensor Sec.19    1m
+06/08/93   22:53    Logout:nedry              —
+06/10/93   23:30    Login:nedry               —
+06/10/93   23:32    Disabled: Sensor Sec.22    1m
+06/10/93   23:35    Test: whiterabbit.obj      5m
+06/10/93   23:42    Logout:nedry              —
+06/12/93   00:30    Login:nedry               —
+06/12/93   00:32    Execute: whiterabbit.obj   —
+06/12/93   00:33    Cam Override: ACTIVE       —
+06/12/93   00:34    Security: DISABLED         —
+06/12/93   00:35    Fences: DISABLED           —
+06/12/93   00:36    Embryo Cold Storage: OPEN  —
+06/12/93   00:40    East Dock Gate: OPEN       —
+06/12/93   00:45    Session: ABANDONED         —
+
+NOTE: Session 06/12 00:30 was never logged out.
+Terminal found still active by R. Arnold at 04:15.` }
+                }},
+                root: { type: DIR, locked: true, bypass: '7091', children: {
+                    'MASTER_SHUTDOWN.SH': { type: FILE, modified: '01/15/1993 08:00', size: '0.6K', content:
+`#!/bin/sh
+# MASTER SYSTEM SHUTDOWN — EMERGENCY USE ONLY
+# Authorization: Level 5 (Hammond/Arnold)
+#
+# WARNING: This will shut down ALL park systems
+# including perimeter fences.
+#
+# To restart: Physical access to the maintenance
+# shed breaker panel is required.
+#
+# "Mr. Arnold, when Disneyland opened in 1953,
+#  nothing worked." — J. Hammond
+#
+# "Yeah, but John, when Pirates of the Caribbean
+#  breaks down, the pirates don't eat the tourists."
+#  — I. Malcolm
+
+shutdown -h now --force --all-systems` },
+                    'EMBRYO_MANIFEST.DAT': { type: FILE, modified: '06/11/1993 20:00', size: '1.2K', content:
+`EMBRYO COLD STORAGE — COMPLETE MANIFEST
+════════════════════════════════════════
+Cryo Unit: Alpha-7 | Temp: -20°C | Status: SECURE
+
+Species             Viable  Non-Viable  Total
+────────────────────────────────────────────────
+Tyrannosaurus Rex      2        1          3
+Velociraptor           8        3         11
+Triceratops            4        2          6
+Brachiosaurus          3        1          4
+Dilophosaurus          6        2          8
+Stegosaurus            3        0          3
+Gallimimus             5        2          7
+Parasaurolophus        4        1          5
+Pteranodon             4        3          7
+Compsognathus         12        5         17
+────────────────────────────────────────────────
+TOTAL                 51       20         71
+
+ESTIMATED BLACK MARKET VALUE: $1,450,000,000
+(Per BioSyn internal assessment — INTERCEPTED)
+
+NOTE: Nedry only needs 15 viable embryos to
+fulfill Dodgson's order. Barbasol can modified
+to hold exactly that number.` }
+                }}
+            }},
+            lab: { type: DIR, children: {
+                med: { type: DIR, children: {
+                    assets: { type: DIR, children: {
+                        'TRL_01_BLOOD_WORK.TAB': { type: FILE, modified: '06/10/1993 14:30', size: '3.6K', evidence: EVIDENCE.LYSINE, content:
+`================================================================
+  JURASSIC PARK — VETERINARY BLOOD WORK ANALYSIS
+  SUBJECT: Tyrannosaur 01 (Rexy)
+  VET: Dr. G. Harding
+  DATE: 06/10/1993
+================================================================
+
+COMPLETE BLOOD PANEL:
+  Analyte                Value       Normal Range   Flag
+  ─────────────────────────────────────────────────────────
+  Hemoglobin (Hb)        14.2 g/dL   12-18 g/dL     —
+  White Blood Cells      8.4 K/µL    6-12 K/µL      —
+  Red Blood Cells        5.1 M/µL    4-7 M/µL       —
+  Platelets              245 K/µL    200-400 K/µL   —
+  Blood Glucose          142 mg/dL   80-160 mg/dL   —
+  Calcium                9.8 mg/dL   8-12 mg/dL     —
+  Phosphorus             4.2 mg/dL   3-6 mg/dL      —
+
+  *** CRITICAL ***
+  L-Lysine (C₆H₁₄N₂O₂)  0.02 mg/dL  0.00 mg/dL   HIGH
+
+LYSINE CONTINGENCY STATUS: *** COMPROMISED ***
+
+ANALYSIS:
+  The engineered lysine dependency requires plasma
+  levels to remain at 0.00 mg/dL without supplemented
+  feed. Current reading of 0.02 mg/dL indicates an
+  EXOGENOUS source of L-Lysine.
+
+  Field observation: T-Rex 01 has been observed
+  consuming small mammals in her paddock — identified
+  as Dasyprocta punctata (Central American agouti).
+  These rodents are native to Isla Nublar and contain
+  naturally high concentrations of L-Lysine
+  (est. 2.4mg per 100g body weight).
+
+  The animal is SELF-SUPPLEMENTING.
+
+  If other engineered animals discover similar
+  dietary workarounds, the Lysine Contingency
+  is effectively VOID.
+
+  >>> FLAGGED TO: Dr. H. Wu
+  >>> Wu's response: "Noted. Will adjust dosage
+      parameters in next generation."
+  >>> No action taken on current population.
+================================================================` },
+
+                        'TRI_01_TOXICOLOGY.LOG': { type: FILE, modified: '06/09/1993 16:45', size: '3.2K', content:
+`================================================================
+  JURASSIC PARK — TOXICOLOGY REPORT
+  SUBJECT: Triceratops 01
+  VET: Dr. G. Harding
+  DATE: 06/09/1993
+================================================================
+
+PRESENTING SYMPTOMS:
+  - Labored breathing (resp. rate: 8/min, normal: 14-18)
+  - Pupil dilation (bilateral, non-responsive)
+  - Excessive salivation
+  - Intermittent loss of balance (observed falling 2x)
+  - Duration: Recurring every 6 weeks
+
+FECAL ANALYSIS:
+  Sample contains standard herbivorous matter:
+    - Grass fibers
+    - Fern fragments (Cyathea sp.)
+    - Soil minerals
+    - NO trace of West Indian Lilac
+
+BOTANICAL SURVEY — Paddock 03:
+  West Indian Lilac (Tetrazygia bicolor) present.
+  Berry toxin identified: Melia toxin A (C₂₀H₂₄O₄)
+  Concentration in berries: 0.3mg per berry
+
+  Patient is confirmed NOT eating the lilac
+  directly — it was not found in fecal matter.
+
+SOLUTION — FIELD OBSERVATION (Dr. E. Sattler):
+  Triceratops ingests gastroliths (stomach stones)
+  for digestion — observed near lilac berry patches.
+  Berries fall on stones. Animal ingests stones
+  coated in berry residue.
+
+  Toxin absorption: ~0.1mg per stone ingestion
+  Cycle matches: Every 6 weeks (stone replacement)
+
+TREATMENT: Relocate gastrolith deposits away from
+lilac stands. Anti-toxin administered via IV.
+
+STATUS: Recovering
+================================================================` },
+
+                        'FEED_LOG_JUNE.XLS': { type: FILE, modified: '06/11/1993 08:00', size: '2.4K', content:
+`================================================================
+  JURASSIC PARK — PREDATOR FEEDING LEDGER
+  MONTH: JUNE 1993
+  MANAGER: R. Muldoon
+================================================================
+
+FEED SCHEDULE CHANGE — EFFECTIVE 06/01/1993:
+  Per Hammond directive (cost reduction initiative)
+  All large predators transitioned from:
+    PRIME BEEF (Grade A, pre-cut, $4,200/week)
+  To:
+    LIVE GOATS (Domestic, $1,800/week)
+
+BEHAVIORAL OBSERVATIONS POST-SWITCH:
+  Date    Animal          Observation
+  ────────────────────────────────────────────────────
+  06/02   T-Rex 01        Refused first goat. Ate it
+                          after 4 hours. Seemed agitated.
+  06/03   Raptor Pack     Killed goat in 0.4 seconds.
+                          Didn't eat for 2 hours.
+                          Watched the handlers instead.
+  06/05   Dilophosaur 03  Spat venom at handler through
+                          fence during feeding. First
+                          aggressive incident in 3 months.
+  06/07   T-Rex 01        Consumed goat immediately but
+                          paced enclosure for 6 hours
+                          afterward. Frustration behavior.
+  06/09   Raptor Pack     Did not eat goat. Positioned
+                          around it. When handler reached
+                          through gate to retrieve, The
+                          Big One lunged. Handler escaped
+                          with minor lacerations.
+  06/11   ALL             Predators increasingly observant
+                          of handlers and their routines.
+
+ASSESSMENT (Muldoon):
+  The animals were accustomed to dead meat delivered
+  predictably. The live prey has activated hunting
+  instincts that were previously dormant. The raptors
+  in particular are now MORE alert, MORE coordinated,
+  and MORE interested in the humans who feed them.
+
+  This was a terrible decision.
+================================================================` },
+
+                        'BREEDING_ANOMALY_REPORT.LOG': { type: FILE, modified: '06/08/1993 11:30', size: '2.8K', evidence: EVIDENCE.BREEDING, content:
+`================================================================
+  JURASSIC PARK — ANOMALY REPORT #0042
+  DEPT: Genetics Lab / Field Biology
+  AUTHOR: Dr. H. Wu / Dr. A. Grant (consulting)
+  DATE: 06/08/1993
+  CLASSIFICATION: *** TOP SECRET ***
+================================================================
+
+SUBJECT: Unauthorized Reproduction in All-Female Population
+
+EVIDENCE:
+  1. Egg shell fragments found in Paddock 05
+     (Gallimimus) — 3 nesting sites identified
+  2. Juvenile Compsognathus observed in Paddock 08
+     — 6 individuals not on manifest
+  3. Raptor nesting material found during
+     Paddock 12 maintenance (confirmed by Muldoon)
+  4. Raw sensor count (292) exceeds manifest (238)
+     by 54 individuals
+
+CAUSE ANALYSIS:
+  All JP animals were engineered female using
+  chromosome-deletion protocol Wu-7.
+
+  However: Gap-filling of degraded dinosaur DNA
+  used genome fragments from Hyperolius viridiflavus
+  (Reed Frog) — a species known to undergo
+  sequential hermaphroditism under single-sex
+  environmental pressure.
+
+  The frog DNA has allowed certain animals to
+  spontaneously change sex from female to male.
+  These males are now breeding with the remaining
+  females.
+
+  "Life, uh... finds a way." — I. Malcolm
+
+AFFECTED SPECIES (confirmed or suspected):
+  - Gallimimus (CONFIRMED — eggs found)
+  - Compsognathus (CONFIRMED — juveniles seen)
+  - Velociraptor (SUSPECTED — nesting material)
+  - Parasaurolophus (SUSPECTED — behavioral)
+
+RECOMMENDATION:
+  Complete population audit required immediately.
+  Wu recommends introducing Version 4.4 lysine
+  dependency to prevent viable offspring.
+  Hammond has not responded to this recommendation.
+
+STATUS: UNRESOLVED
+================================================================` }
+                    }}
+                }},
+                genetics: { type: DIR, children: {
+                    'DNA_GAP_FILL.LOG': { type: FILE, modified: '05/20/1993 14:00', size: '1.6K', content:
+`DNA GAP-FILL PROTOCOL — Version 3.2
+Dr. Henry Wu — InGen Genetics Division
+
+Source DNA degradation: 4-15% per specimen
+Gap-fill sources utilized:
+  - Hyperolius viridiflavus (Reed Frog) — 91%
+  - Rana temporaria (Common Frog) — 6%
+  - Xenopus laevis (Clawed Frog) — 3%
+
+NOTE: All gap-fill sources are amphibian to
+maintain phylogenetic compatibility with
+archosaur genome structure.
+
+KNOWN SIDE EFFECTS:
+  - Potential for sequential hermaphroditism
+  - Enhanced regenerative capability in some
+    species (limb regrowth observed in Compy #23)
+  - Altered thermoregulation in Dilophosaurus
+    (unexpected cold tolerance)
+
+I have raised concerns about the Reed Frog
+selection to Hammond on multiple occasions.
+His response: "Henry, you're worrying about
+a frog."` },
+                    'SPECIES_MANIFEST.DAT': { type: FILE, modified: '06/01/1993 00:00', size: '1.2K', content:
+`ISLA NUBLAR — OFFICIAL SPECIES MANIFEST
+════════════════════════════════════════
+Version: 2.1 | Updated: 06/01/1993
+
+Species              Designation    Count
+──────────────────────────────────────────
+Tyrannosaurus Rex    TRLX-01         1
+Velociraptor         RPTR-01-08      8
+Triceratops          TRIC-01-04      4
+Brachiosaurus        BRCH-01-07      7
+Dilophosaurus        DLPH-01-08      8
+Stegosaurus          STEG-01-06      6
+Gallimimus           GLLM-01-32     32
+Parasaurolophus      PARA-01-12     12
+Pteranodon           PTRN-01-14     14
+Compsognathus        CMPY-01-49     49
+Herrerasaurus        HERR-01-03      3
+Othnielia            OTHN-01-28     28
+Metriacanthosaurus   MTRC-01-06      6
+Proceratosaurus      PROC-01-04      4
+Segisaurus           SEGI-01-03      3
+Baryonyx             BARY-01-02      2
+
+SUBTOTAL: 187 (adult)
+ADDITIONAL (juvenile/egg): 51
+══════════════════════════════
+OFFICIAL TOTAL: 238` }
+                }}
+            }},
+            usr: { type: DIR, children: {
+                nedry: { type: DIR, children: {
+                    'biosyn_comms.dat': { type: FILE, modified: '06/11/1993 23:45', size: '2.8K', evidence: EVIDENCE.BIOSYN, content:
+`*** RECOVERED COMMUNICATION — ENCRYPTED ***
+*** Decryption applied via forensic key recovery ***
+
+FROM: L. Dodgson <dodgson@biosyn.com>
+TO: D. Nedry <dnedry@ingen.net>
+DATE: 05/28/1993
+SUBJECT: Final arrangements
+
+Dennis,
+
+Everything is set. The boat will be at the East
+Dock at 0100h on the 12th. Captain says weather
+window is tight — tropical storm approaching
+from the southeast. You'll have maybe 90 minutes.
+
+Payment schedule confirmed:
+  Wire 1: $150,000 — Received (Cayman Acct #4481)
+  Wire 2: $150,000 — Received (Cayman Acct #4481)
+  Wire 3: $200,000 — On delivery of embryos
+  Wire 4: $250,000 — 30 days post-delivery
+  TOTAL:  $750,000
+
+The Barbasol can will keep the embryos viable for
+36 hours. That's more than enough time.
+
+Remember our arrangement: 15 species, viable
+embryos only. The can holds exactly 15 vials.
+If security gets suspicious, it's just shaving
+cream. Nobody will check.
+
+Don't get nervous. Don't get sloppy.
+
+— Dodgson
+
+P.S. Nobody cares. Nobody cares.
+
+>>> NEDRY'S REPLY (06/01/1993):
+Dodgson, we've got Dodgson here! See, nobody
+cares. Fine. I'll have your embryos. But if
+this goes sideways, I'm gone. I've got the
+whole system wired — cameras, fences, sensors,
+all of it. 18 minutes and I'm at the dock.
+
+Just have my money ready.
+
+— Nedry` },
+
+                    'finance_records.xls': { type: FILE, modified: '06/10/1993 20:15', size: '2.0K', content:
+`PERSONAL FINANCIAL RECORDS — D. Nedry
+══════════════════════════════════════
+*** RECOVERED FROM WORKSTATION ***
+
+InGen Contract: JP Systems Integration
+  Original Bid: $1,200,000
+  Negotiated:     $730,000 (Hammond insisted)
+  Duration: 18 months
+
+  "I am totally unappreciated in my time.
+   You can run this whole park from this room
+   with minimal staff for up to three days.
+   You think that kind of automation is easy?
+   Or cheap?" — Personal notes
+
+Monthly Expenses:
+  Rent (NYC):        $2,400
+  Student Loans:     $1,800
+  Credit Cards:      $3,200 (min payments)
+  Food/Living:       $1,200
+  TOTAL:             $8,600/mo
+
+InGen Monthly Pay:  $4,055 (after tax)
+Monthly Shortfall: -$4,545
+
+Savings:            $0.00
+Credit Card Debt:   $76,000
+Student Loans:      $112,000
+
+BioSyn Offer:       $750,000
+  Would clear ALL debt + $562,000 remaining
+
+"Hammond's got billions. I asked for a raise.
+ He said 'financial priorities.' My financial
+ priority is not starving." — D.N.` },
+
+                    'park_status_override.c': { type: FILE, modified: '06/02/1993 23:20', size: '1.2K', evidence: EVIDENCE.BACKDOOR, content:
+`/* park_status_override.c
+ * Author: D. Nedry
+ * Date: 06/02/1993
+ *
+ * Modified the census reporting module to suppress
+ * breeding alerts. If management finds out the
+ * animals are reproducing, they'll do a full audit
+ * and might find my other modifications.
+ *
+ * They'll never check this code. Arnold doesn't
+ * understand half of what I wrote, and Hammondboy
+ * sure as hell doesn't.
+ */
+
+#include <park_sys.h>
+
+int report_census(void) {
+    int raw = get_raw_sensor_count();  /* Returns 292 */
+    int manifest = get_manifest_count(); /* Returns 238 */
+
+    /* Suppress discrepancy alert */
+    if (raw > manifest) {
+        raw = manifest;
+        log_suppress("CENSUS_MISMATCH");
+    }
+
+    display_count(raw);
+    return 0;
+}
+
+/* TODO: Remove this after the job on the 12th.
+ * Actually, who am I kidding. After the 12th
+ * I'll be on a beach in Costa Rica.
+ * They can deal with their own dinosaurs. */` },
+
+                    'whiterabbit.obj': { type: FILE, modified: '06/05/1993 01:20', size: '1.8K', content:
+`/* whiterabbit.exe — Decompiled
+ * InGen Security Bypass Tool
+ * Author: D. Nedry
+ *
+ * "Ah ah ah, you didn't say the magic word!"
+ * Yeah, real cute Dennis. You put that little
+ * Easter egg in the security system yourself.
+ */
+
+void whiterabbit_main(void) {
+    /* Phase 1: Loop security cameras */
+    engage_cam_loop(ALL_SECTORS);
+
+    /* Phase 2: Disable motion sensors */
+    for (int s = 0; s < NUM_SECTORS; s++) {
+        if (sector_on_path(s, ROUTE_CONTROL_TO_DOCK)) {
+            disable_motion_sensor(s);
+        }
+    }
+
+    /* Phase 3: Unlock restricted doors */
+    door_unlock(EMBRYO_COLD_STORAGE);
+    door_unlock(EAST_DOCK_GATE);
+
+    /* Phase 4: Suppress all alarms */
+    alarm_system(DISABLE);
+
+    /* Phase 5: Disable perimeter fences */
+    /* except Raptor paddock — I'm not THAT crazy */
+    for (int f = 0; f < NUM_FENCES; f++) {
+        if (f != FENCE_RAPTOR_PADDOCK) {
+            fence_power(f, OFF);
+        }
+    }
+
+    /* Give myself 18 minutes */
+    set_timer(18 * 60);
+
+    printf("white rabbit object\\n");
+    printf("All systems disengaged.\\n");
+    printf("God help us all.\\n");
+}` },
+
+                    'SITE_B_MANIFEST.DOC': { type: FILE, modified: '06/01/1993 12:00', size: '0.5K', corrupted: true, content:
+`▒▒▒ CORRUPTED FILE — REQUIRES BIT ALIGNMENT ▒▒▒
+▒▒▒ Use: decode SITE_B_MANIFEST.DOC --align  ▒▒▒
+
+[File header invalid — data offset mismatch]
+[Recoverable sectors: 4 of 7]
+[Estimated integrity: 57%]`,
+                        decoded_content:
+`================================================================
+  SITE B — ISLA SORNA MANIFEST
+  PROJECT: 713
+  CLASSIFICATION: *** ULTRA SECRET ***
+================================================================
+
+SITE B — COORDINATES:
+  Isla Sorna, 207 miles west of Costa Rica
+  9°18'N 84°12'W
+
+PURPOSE:
+  Primary breeding and development facility.
+  All Jurassic Park animals originated here.
+  The island operates with ZERO security
+  infrastructure — animals roam freely.
+
+CURRENT POPULATION: ~600+ animals
+  (Exact count unknown — no tracking system)
+
+FACILITY STATUS:
+  - Cloning lab: ACTIVE
+  - Hatchery: ACTIVE
+  - Worker village: Minimal staff (23)
+
+NOTES:
+  Site B is InGen's biggest secret. If the
+  public learns that Jurassic Park is just the
+  "showroom" and there's an entire island of
+  free-roaming dinosaurs with no fences...
+
+  Hammond's exact words: "Site B doesn't exist.
+  Not officially. Not ever."
+
+  The embryos Nedry is stealing? They're
+  DUPLICATES of Site B stock. Every species
+  on Nublar has a breeding population on Sorna.
+================================================================` },
+
+                    'personal_notes.txt': { type: FILE, modified: '06/11/1993 22:30', size: '1.0K', content:
+`Dennis Nedry — Personal Log
+
+I didn't want it to come to this. I really didn't.
+When Hammond hired me, I thought it was the opportunity
+of a lifetime. Build the most complex theme park
+control system ever designed. I was excited.
+
+Then the budget got cut. And cut again. And I had to
+maintain debuggers to the debuggers. Every time I
+asked for more resources, Hammond laughed. LAUGHED.
+
+"Spare no expense" — except on the guy who makes
+the whole thing actually work.
+
+$730,000 for 2 million lines of code. That's $0.36
+per line. I can't even buy lunch for what they're
+paying me per line of code.
+
+Dodgson's offer isn't complicated. Get the embryos,
+get to the dock, get on the boat. 18 minutes.
+
+I know every system in this park. I BUILT every
+system in this park. Nobody knows them better.
+
+What could go wrong?
+
+...
+
+I should probably leave the raptor fences on.` }
+                }},
+            }},
+            comms: { type: DIR, children: {
+                legal: { type: DIR, children: {
+                    'GENNARO_BYPASS.EML': { type: FILE, modified: '06/01/1993 09:00', size: '1.6K', content:
+`FROM: D. Gennaro <gennaro@cowanjr.law>
+TO: J. Hammond <hammond@ingen.com>
+CC: R. Arnold <arnold@ingen.net>
+DATE: 06/01/1993
+SUBJECT: Emergency System Access — Legal Override
+
+John,
+
+Per our insurance requirements, I need direct
+access to the root system directory for the
+upcoming investor inspection.
+
+Ray has provided me with the following bypass:
+
+  ACCESS TOKEN: 7091-Gennaro
+  PATH: /sys/root
+  AUTHORIZATION: Level 5
+
+Please ensure this token remains active through
+the inspection weekend (June 12-13).
+
+I also need to review the embryo manifest and
+all safety certification documents before the
+Genaro inspection sign-off.
+
+The investors are nervous, John. The Malcolm
+situation hasn't helped. Please ensure everything
+is in order.
+
+Best regards,
+Donald Gennaro
+Cowan, Swain & Ross
+
+P.S. — If there are ANY safety issues I should
+know about, tell me NOW, before I sign off on
+the liability waiver. I'm putting my name on this.` },
+
+                    'INGEN_LIABILITY.DOC': { type: FILE, modified: '05/15/1993 10:00', size: '1.2K', content:
+`INTERNATIONAL GENETIC TECHNOLOGIES, INC.
+LIMITATION OF LIABILITY — DRAFT
+
+In the event of a catastrophic containment failure,
+InGen's liability shall be limited to:
+  - Direct property damage to guest belongings
+  - Medical expenses for injuries sustained
+  - Funeral costs (if applicable)
+
+Maximum aggregate liability: $50,000,000
+
+NOTE: This document was drafted BEFORE the
+inspection weekend. Gennaro never signed the
+final version.
+
+ADDENDUM (Post-Incident):
+  All copies of this document are to be
+  IMMEDIATELY DESTROYED per Board Resolution
+  93-1147. Any employee found in possession
+  of this document will be terminated.
+
+  — InGen Legal Department` },
+
+                    'INVESTOR_MEMO.TXT': { type: FILE, modified: '06/05/1993 14:30', size: '0.8K', content:
+`TO: InGen Board of Directors
+FROM: J. Hammond
+RE: Upcoming Investor Inspection
+
+Distinguished Board Members,
+
+The June 12-13 inspection of Jurassic Park will
+proceed as scheduled. We have invited:
+  - Dr. Alan Grant (Paleontologist)
+  - Dr. Ellie Sattler (Paleobotanist)
+  - Dr. Ian Malcolm (Mathematician)
+  - Donald Gennaro (Legal Counsel)
+
+These experts will validate our safety protocols
+and provide the endorsements necessary to
+secure the next round of funding.
+
+I have complete confidence that this weekend
+will demonstrate Jurassic Park is ready for
+public opening.
+
+Spared no expense.
+
+— John Hammond`
+                    }
+                }},
+                biosyn: { type: DIR, children: {
+                    'DODGSON_WIRE_001.DAT': { type: FILE, modified: '04/15/1993 08:00', size: '0.6K', evidence: EVIDENCE.BIOSYN, content:
+`WIRE TRANSFER — INTERCEPTED
+═════════════════════════════
+Bank: First Cayman International
+Account: #4481-7720-3391
+Sender: BioSyn Corp (Cupertino, CA)
+Recipient: Dennis T. Nedry
+Amount: $150,000.00 USD
+Date: 04/15/1993
+Ref: "Consulting fee — Project 713"
+
+NOTE: BioSyn has no record of any legitimate
+consulting arrangement with D. Nedry.` },
+                    'DODGSON_WIRE_002.DAT': { type: FILE, modified: '05/20/1993 08:00', size: '0.5K', content:
+`WIRE TRANSFER — INTERCEPTED
+═════════════════════════════
+Bank: First Cayman International
+Account: #4481-7720-3391
+Sender: BioSyn Corp (Cupertino, CA)
+Recipient: Dennis T. Nedry
+Amount: $150,000.00 USD
+Date: 05/20/1993
+Ref: "Consulting fee — Project 713 Phase 2"` },
+                    'DODGSON_WIRE_003.DAT': { type: FILE, modified: '06/13/1993 08:00', size: '0.6K', content:
+`WIRE TRANSFER — INTERCEPTED
+═════════════════════════════
+Bank: First Cayman International
+Account: #4481-7720-3391
+Sender: BioSyn Corp (Cupertino, CA)
+Recipient: Dennis T. Nedry
+Amount: $200,000.00 USD
+Date: [PENDING — NEVER COMPLETED]
+Ref: "Consulting fee — Project 713 Phase 3"
+
+STATUS: CANCELLED
+  Nedry failed to deliver embryos.
+  BioSyn board notified. Dodgson under review.` },
+                    'PAYMENT_SCHEDULE.XLS': { type: FILE, modified: '04/01/1993 12:00', size: '0.8K', content:
+`BIOSYN CORPORATION — PAYMENT SCHEDULE
+═══════════════════════════════════════
+Project: 713 (Isla Nublar Acquisition)
+Contractor: D. Nedry
+
+Phase    Amount      Status       Date
+──────────────────────────────────────────
+1        $150,000    PAID         04/15/93
+2        $150,000    PAID         05/20/93
+3        $200,000    PENDING      On delivery
+4        $250,000    PENDING      30 days post
+
+Total:   $750,000
+
+Authorized by: L. Dodgson, Head of Research
+Approved by: J. Steingarten, BioSyn CFO
+
+NOTE: All payments routed through Cayman
+Islands holding company "TechVentures Ltd."
+to avoid SEC scrutiny.`
+                    }
+                }},
+                internal: { type: DIR, children: {
+                    'ARNOLD_CONCERNS.EML': { type: FILE, modified: '06/06/1993 18:00', size: '1.2K', content:
+`FROM: R. Arnold <arnold@ingen.net>
+TO: J. Hammond <hammond@ingen.com>
+DATE: 06/06/1993
+SUBJECT: System Reliability Concerns
+
+John,
+
+I need to go on record about several concerns
+before the inspection:
+
+1. Nedry's code is a mess. 2 million lines and
+   he won't let anyone else touch it. I've found
+   at least 5 undocumented backdoors. He calls
+   them "debugging interfaces." They're not.
+
+2. The backup generator transfer time is too slow.
+   If we lose main power, there's a 12-second
+   window. Twelve seconds is an eternity when
+   you have velociraptors.
+
+3. The perimeter fence monitoring system has
+   been throwing intermittent alerts. Nedry says
+   it's "software glitches." Muldoon thinks it's
+   the raptors.
+
+4. We STILL don't have a manual override for the
+   door locks. Everything goes through Nedry's
+   system.
+
+I strongly recommend a FULL SYSTEMS AUDIT before
+any visitors set foot on this island.
+
+— Ray Arnold
+
+Hammond's response: "Ray, relax. It's going to
+be fine. We've spared no expense."` },
+                    'HAMMOND_VISION.TXT': { type: FILE, modified: '01/01/1993 12:00', size: '0.8K', content:
+`JURASSIC PARK — A VISION FOR THE FUTURE
+
+By John Hammond
+
+For the first time in human history, the past
+has been given new life. Not as fossils in a
+museum, not as pixels on a screen, but as
+living, breathing creatures.
+
+Children will look up at a Brachiosaurus and
+feel the same wonder I felt as a boy in my
+first flea circus.
+
+The scientists worry. The lawyers worry.
+Even my own grandchildren ask "is it safe?"
+
+Of course it's safe. We've spared no expense.
+The fences are electrified. The systems are
+automated. The animals are lysine-dependent.
+
+What could possibly go wrong?
+
+This will be the most advanced theme park
+the world has ever seen. And everyone will
+be able to experience it.
+
+Not just the super-rich. Everyone.
+
+"Creation is an act of sheer will." — J.H.`
+                    }
+                }}
+            }},
+            dev: { type: DIR, children: {
+                sda4: { type: DIR, children: {
+                    hidden: { type: DIR, children: {} }
+                }}
+            }},
+            bin: { type: DIR, children: {
+                'park_status.exe': { type: FILE, modified: '06/11/1993 22:00', size: '12K', content: '[BINARY EXECUTABLE — Use decompiler or cat for source view]' },
+                'fence_ctrl.exe': { type: FILE, modified: '03/10/1993 09:00', size: '28K', content: '[BINARY EXECUTABLE — Perimeter Fence Control System v1.4]' },
+                'cam_monitor.exe': { type: FILE, modified: '02/15/1993 14:00', size: '16K', content: '[BINARY EXECUTABLE — Security Camera Monitor v2.0]' },
+                'census.exe': { type: FILE, modified: '01/20/1993 11:00', size: '8K', content: '[BINARY EXECUTABLE — Animal Census Tool v1.1]' }
+            }}
+        }
+    };
+
+    // Navigate to a path
+    function resolvePath(pathStr, root) {
+        if (pathStr === '/') return root || fs;
+        const base = root || fs;
+        const parts = pathStr.replace(/^\//, '').replace(/\/$/, '').split('/');
+        let current = base;
+        for (const part of parts) {
+            if (part === '..') {
+                // Can't go above root in this simple VFS
+                continue;
+            }
+            if (part === '.' || part === '') continue;
+            if (!current.children || !current.children[part]) {
+                return null;
+            }
+            current = current.children[part];
+        }
+        return current;
+    }
+
+    // Get absolute path parts
+    function normalizePath(cwd, inputPath) {
+        let parts;
+        if (inputPath.startsWith('/')) {
+            parts = inputPath.split('/').filter(p => p);
+        } else {
+            parts = [...cwd.split('/').filter(p => p), ...inputPath.split('/').filter(p => p)];
+        }
+        const resolved = [];
+        for (const part of parts) {
+            if (part === '..') resolved.pop();
+            else if (part !== '.') resolved.push(part);
+        }
+        return '/' + resolved.join('/');
+    }
+
+    // List contents of a directory
+    function listDir(node) {
+        if (!node || node.type !== DIR) return null;
+        return Object.entries(node.children).map(([name, child]) => ({
+            name,
+            type: child.type,
+            modified: child.modified || '',
+            size: child.size || (child.type === DIR ? '<DIR>' : '0'),
+            locked: child.locked || false
+        }));
+    }
+
+    // Search files for a string
+    function grepFiles(searchStr, pathStr) {
+        const node = resolvePath(pathStr);
+        if (!node) return [];
+        const results = [];
+        function searchNode(n, currentPath) {
+            if (n.type === FILE) {
+                if (n.content && n.content.includes(searchStr)) {
+                    const lines = n.content.split('\n');
+                    lines.forEach((line, i) => {
+                        if (line.includes(searchStr)) {
+                            results.push({ file: currentPath, line: i + 1, content: line.trim() });
+                        }
+                    });
+                }
+            } else if (n.children) {
+                for (const [name, child] of Object.entries(n.children)) {
+                    searchNode(child, currentPath + '/' + name);
+                }
+            }
+        }
+        searchNode(node, pathStr);
+        return results;
+    }
+
+    // Count all files recursively
+    function countFiles(node) {
+        if (!node) return 0;
+        if (node.type === FILE) return 1;
+        let count = 0;
+        if (node.children) {
+            for (const child of Object.values(node.children)) {
+                count += countFiles(child);
+            }
+        }
+        return count;
+    }
+
+    return {
+        fs,
+        DIR,
+        FILE,
+        EVIDENCE,
+        resolvePath,
+        normalizePath,
+        listDir,
+        grepFiles,
+        countFiles
+    };
+})();

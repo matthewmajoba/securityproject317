@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InGen Central Computer System v4.0.5</title>
+    <meta name="description" content="Project 713: The Nedry Audit — InGen Digital Forensics Workstation">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- CRT Overlay (scanlines + vignette) -->
+    <div id="crt-overlay"></div>
+
+    <!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+    <div id="login-screen">
+        <div id="login-content">
+            <div id="login-logo-container">
+                <img src="jp_logo.png" alt="Jurassic Park" id="login-logo">
+            </div>
+            <h1 id="login-title">CENTRAL COMPUTER SYSTEM</h1>
+            <p id="login-version">VERSION 4.0.5 - INGEN CORP.</p>
+            <div id="login-form">
+                <div class="login-field">
+                    <label for="login-user">USERNAME:</label>
+                    <input type="text" id="login-user" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="login-field">
+                    <label for="login-pass">PASSWORD:</label>
+                    <input type="password" id="login-pass">
+                </div>
+                <button id="login-btn">ACCESS SYSTEM</button>
+            </div>
+            <p id="login-warning">ACCESS RESTRICTED TO AUTHORIZED PERSONNEL ONLY</p>
+            <p id="login-alert">PARK WIDE SECURITY ALERT IN EFFECT</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════ BOOT SEQUENCE ═══════════════ -->
+    <div id="boot-screen" class="hidden">
+        <div id="boot-content">
+            <pre id="boot-text"></pre>
+            <div id="boot-progress-bar">
+                <div id="boot-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MAGIC WORD POPUP (corner) ═══════════════ -->
+    <div id="magic-word-popup" class="hidden">
+        <div id="magic-word-header">
+            <span class="magic-word-icon">⚠</span>
+            <span>ALERT.EXE</span>
+        </div>
+        <div id="magic-word-body">
+            <div id="magic-word-text">YOU DIDN'T SAY THE MAGIC WORD!</div>
+            <div id="lockout-timer"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ DECODE PUZZLE OVERLAY ═══════════════ -->
+    <div id="decode-overlay" class="hidden">
+        <div id="decode-content">
+            <div id="decode-header">BINARY DATA RECOVERY — BIT ALIGNMENT TOOL v2.1</div>
+            <div id="decode-streams">
+                <div id="decode-stream-left" class="decode-stream">
+                    <div class="stream-label">STREAM A — OFFSET 0x00</div>
+                    <pre id="decode-hex-left"></pre>
+                </div>
+                <div id="decode-align-indicator">
+                    <div id="decode-status">MISALIGNED</div>
+                    <div id="decode-offset">OFFSET: +0</div>
+                </div>
+                <div id="decode-stream-right" class="decode-stream">
+                    <div class="stream-label">STREAM B — OFFSET 0x00</div>
+                    <pre id="decode-hex-right"></pre>
+                </div>
+            </div>
+            <div id="decode-controls">
+                <span>[ ↑/↓ ] Shift Stream B    [ ENTER ] Lock Alignment    [ ESC ] Abort</span>
+            </div>
+            <div id="decode-result" class="hidden"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ DESKTOP SHELL ═══════════════ -->
+    <div id="desktop" class="hidden">
+        <!-- Desktop Icons -->
+        <div id="desktop-icons">
+            <div class="desktop-icon" data-action="open-explorer" data-path="/">
+                <div class="icon-img icon-folder-yellow"></div>
+                <span>Island_Map</span>
+            </div>
+            <div class="desktop-icon" data-action="open-explorer" data-path="/sys">
+                <div class="icon-img icon-system"></div>
+                <span>System_Comp</span>
+            </div>
+            <div class="desktop-icon" data-action="open-explorer" data-path="/sys/park/sec">
+                <div class="icon-img icon-alert-red"></div>
+                <span>Security_Log</span>
+            </div>
+        </div>
+
+        <!-- JP Logo watermark -->
+        <div id="desktop-watermark">
+            <img src="jp_logo.png" alt="" id="watermark-logo">
+        </div>
+
+        <!-- Window Container -->
+        <div id="window-container"></div>
+
+        <!-- Taskbar -->
+        <div id="taskbar">
+            <div id="taskbar-start">
+                <div id="start-button">▣ System</div>
+            </div>
+            <div id="taskbar-tabs"></div>
+            <div id="taskbar-clock"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="vfs.js"></script>
+    <script src="windowManager.js"></script>
+    <script src="puzzles.js"></script>
+    <script src="terminal.js"></script>
+    <script src="boot.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
