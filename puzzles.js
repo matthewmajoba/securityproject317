@@ -71,15 +71,13 @@ const Puzzles = (() => {
                 return {
                     status: 'critical',
                     response: `Excellent find. This is exactly what we needed.\n\n` +
-                        `>>> ${count}/${REQUIRED_EVIDENCE} EVIDENCE COLLECTED <<<\n\n` +
-                        `That's everything. We have enough for the investigation.\n` +
+                        `That should be everything. We have enough for the investigation.\n` +
                         `Run 'submit_audit' in the terminal to package your findings.`
                 };
             }
             return {
                 status: 'critical',
                 response: `Excellent find. Flagging this for the investigation.\n\n` +
-                    `>>> ${count}/${REQUIRED_EVIDENCE} EVIDENCE COLLECTED <<<\n\n` +
                     `Keep looking. There has to be more.`
             };
         }
@@ -387,7 +385,6 @@ Look for hidden directories, suspicious programs, and access logs.`);
         body.innerHTML = `
             <div class="evidence-header">
                 <span class="evidence-title">INGEN FORENSIC EVIDENCE TRACKER</span>
-                <span class="evidence-counter" id="${win.id}-counter">${count}/${REQUIRED_EVIDENCE} Evidence Collected</span>
             </div>
             <div class="evidence-submit-bar">
                 <input type="text" class="evidence-input" id="${win.id}-input" 
@@ -402,7 +399,6 @@ Look for hidden directories, suspicious programs, and access logs.`);
         const input = document.getElementById(`${win.id}-input`);
         const btn = document.getElementById(`${win.id}-btn`);
         const log = document.getElementById(`${win.id}-log`);
-        const counter = document.getElementById(`${win.id}-counter`);
 
         function handleSubmit() {
             const path = input.value.trim();
@@ -413,28 +409,45 @@ Look for hidden directories, suspicious programs, and access logs.`);
             const entry = document.createElement('div');
             entry.className = `evidence-entry evidence-${result.status}`;
 
-            const statusIcons = {
-                critical: '■',
-                motive: '◆',
-                irrelevant: '✗',
-                duplicate: '↻',
-                not_found: '?',
-                directory: '📁'
-            };
-
+            // Evidence tracker just shows the path + transmission status
             entry.innerHTML = `
-                <div class="evidence-entry-path">${statusIcons[result.status] || '•'} ${path}</div>
-                <div class="evidence-entry-response">${result.response}</div>`;
+                <div class="evidence-entry-path">▸ ${path}</div>
+                <div class="evidence-entry-response" id="entry-status-${Date.now()}">Transmitting...</div>`;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
 
-            counter.textContent = `${submittedEvidence.length}/${REQUIRED_EVIDENCE} Evidence Collected`;
+            const statusEl = entry.querySelector('.evidence-entry-response');
 
-            if (result.status === 'critical') {
-                AudioEngine.playSuccess();
-            } else if (result.status === 'irrelevant') {
-                AudioEngine.playError();
-            }
+            // After a short delay, update status and route response to talk window
+            const sendDelay = 2000 + Math.random() * 2000; // 2-4 seconds
+            setTimeout(() => {
+                // Update tracker status
+                if (result.status === 'critical') {
+                    statusEl.textContent = 'Received — flagged for review';
+                    statusEl.style.color = 'var(--crt-green)';
+                    AudioEngine.playSuccess();
+                } else if (result.status === 'motive') {
+                    statusEl.textContent = 'Received — under review';
+                    statusEl.style.color = 'var(--crt-amber)';
+                } else if (result.status === 'duplicate') {
+                    statusEl.textContent = 'Already submitted';
+                    statusEl.style.color = '#666';
+                } else if (result.status === 'not_found' || result.status === 'directory') {
+                    statusEl.textContent = 'Error — invalid path';
+                    statusEl.style.color = '#666';
+                } else {
+                    statusEl.textContent = 'Received — under review';
+                    statusEl.style.color = '#888';
+                }
+
+                // Boss responds via talk window after another brief pause
+                const responseDelay = 1500 + Math.random() * 2000; // 1.5-3.5 seconds
+                setTimeout(() => {
+                    // Open talk window if not already open, then send response
+                    Terminal.openTalkReeves(result.response);
+                }, responseDelay);
+
+            }, sendDelay);
         }
 
         btn.addEventListener('click', handleSubmit);

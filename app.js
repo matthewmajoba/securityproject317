@@ -381,7 +381,7 @@ const App = (() => {
 
     function openTerminalImageStyle() {
         const win = WindowManager.createWindow('root@jp-server: /usr/bin/tcsh', 'terminal', {
-            width: 700, height: 420,
+            width: 950, height: 580,
             singleInstance: 'terminal',
             titlebarClass: 'dark', titleIcon: '▣'
         });
@@ -442,10 +442,10 @@ const App = (() => {
 
     function openCameraFeedImageStyle() {
         const win = WindowManager.createWindow('FEED: EAST DOCK — CAM 01', 'camera', {
-            width: 380, height: 280, titleIcon: '📹'
+            width: 560, height: 420, titleIcon: '📹'
         });
         const el = document.getElementById(win.id);
-        el.style.left = (window.innerWidth - 400) + 'px';
+        el.style.left = (window.innerWidth - 580) + 'px';
         el.style.top = '10px';
 
         const body = WindowManager.getBody(win.id);

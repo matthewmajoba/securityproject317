@@ -210,7 +210,7 @@ const Terminal = (() => {
     }
 
     /* --- TALK --- */
-    function cmdTalk(output, args) {
+    function cmdTalk(output, args, injectedMessage) {
         if (!args[0] || args[0].toLowerCase() !== 'reeves') {
             appendOutput(output, '<span class="output-dim">Usage: talk reeves</span>');
             return;
@@ -333,20 +333,27 @@ const Terminal = (() => {
             setTimeout(typeNext, 400 + Math.random() * 300);
         }
 
-        // Boss greeting based on evidence count
-        const count = Puzzles.getEvidenceCount();
-        let greeting;
-        if (count === 0) {
-            greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
-        } else if (count < 3) {
-            greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
-        } else if (count < 5) {
-            greeting = `We're building a strong case. ${count} out of 5 pieces so far. Just need ${5 - count} more and we'll have enough to present to the board. You're close.`;
-        } else {
-            greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
-        }
+        // Store reference for external message injection
+        activeTalk = { bossPane, typeMessage };
 
-        setTimeout(() => typeMessage(greeting), 800);
+        if (injectedMessage) {
+            // Evidence submission opened this window — skip greeting, just type the response
+            setTimeout(() => typeMessage(injectedMessage), 800);
+        } else {
+            // Player opened it manually or auto-open — show greeting
+            const count = Puzzles.getEvidenceCount();
+            let greeting;
+            if (count === 0) {
+                greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
+            } else if (count < 3) {
+                greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
+            } else if (count < 5) {
+                greeting = `We're building a strong case. Just need a bit more and we'll have enough to present to the board. You're close.`;
+            } else {
+                greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
+            }
+            setTimeout(() => typeMessage(greeting), 800);
+        }
 
         // Handle player messages
         talkInput.addEventListener('keydown', (e) => {
@@ -617,10 +624,22 @@ Launching alignment interface...`);
         if (output) output.innerHTML = '';
     }
 
-    /* --- PUBLIC: open talk window from outside (auto-open timer) --- */
-    function openTalkReeves() {
+    /* --- PUBLIC: open talk window from outside, optionally inject a message --- */
+    // Track active talk window for message injection
+    let activeTalk = null; // { bossPane, typeMessage }
+
+    function openTalkReeves(message) {
+        // If talk window already exists and we have a message, just inject it
+        if (activeTalk && activeTalk.bossPane && document.body.contains(activeTalk.bossPane)) {
+            if (message) {
+                activeTalk.typeMessage(message);
+            }
+            return;
+        }
+
+        // Otherwise open a new talk window
         const dummy = document.createElement('div');
-        cmdTalk(dummy, ['reeves']);
+        cmdTalk(dummy, ['reeves'], message);
     }
 
     return { spawn, cwd: () => cwd, openTalkReeves };
