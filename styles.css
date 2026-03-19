@@ -1,11 +1,11 @@
 /* ============================================================
    PROJECT 713: THE NEDRY AUDIT
-   Visual Design — Matched to Reference Screenshots
+   Visual Design — Windows 3.1 Gray UI with Teal Desktop
    ============================================================ */
 
 /* --- CSS Variables --- */
 :root {
-    /* Reference Image 1: Dark teal desktop background */
+    /* Teal textured desktop background */
     --desktop-bg: #1a2e2e;
     --desktop-bg-light: #213838;
     --desktop-bg-gradient: linear-gradient(135deg, #0f1f1f 0%, #1a2e2e 40%, #1f3535 100%);
@@ -26,17 +26,24 @@
     --crt-white: #ccddcc;
     --crt-yellow: #e8c840;
     
-    /* Window chrome — from Image 1 title bars */
-    --titlebar-teal: linear-gradient(180deg, #2a6666 0%, #1a4444 100%);
-    --titlebar-dark: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
-    --titlebar-navy: linear-gradient(180deg, #2a3a5a 0%, #1a2a3a 100%);
+    /* Windows 3.1 gray chrome */
+    --win-bg: #c0c0c0;
+    --win-face: #c0c0c0;
+    --win-light: #ffffff;
+    --win-mid: #808080;
+    --win-dark: #404040;
+    --win-shadow: #000000;
+    --win-titlebar-active: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    --win-titlebar-inactive: linear-gradient(90deg, #808080 0%, #c0c0c0 100%);
+    --win-title-text-active: #ffffff;
+    --win-title-text-inactive: #c0c0c0;
     
-    /* Explorer — from Image 1 (light background) */
-    --explorer-bg: #d8d8d0;
-    --explorer-border: #a8a8a0;
-    --explorer-text: #222222;
+    /* Explorer */
+    --explorer-bg: #ffffff;
+    --explorer-border: #808080;
+    --explorer-text: #000000;
     
-    /* Panels */
+    /* Panels (dark content areas) */
     --bg-dark: #0a0e0e;
     --bg-panel: #111818;
     --bg-window: #0d120d;
@@ -44,9 +51,9 @@
     --border-bright: #33aa33;
     --border-teal: #2a6666;
     
-    /* Taskbar — from Image 1 (dark with slight teal) */
-    --taskbar-bg: #0e1a1a;
-    --taskbar-border: #2a6666;
+    /* Taskbar */
+    --taskbar-bg: #c0c0c0;
+    --taskbar-border: #808080;
     
     /* Fonts */
     --font-mono: 'Share Tech Mono', 'Courier New', monospace;
@@ -73,39 +80,70 @@ html, body {
 
 .hidden { display: none !important; }
 
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: var(--bg-dark); }
-::-webkit-scrollbar-thumb { background: #1a5c1a; border: 1px solid #1a5c1a; }
-::-webkit-scrollbar-thumb:hover { background: #33aa33; }
+/* --- CRT Barrel Curvature (whole screen) --- */
+#crt-screen-wrap {
+    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0;
+    /* Barrel distortion via perspective */
+    overflow: hidden;
+}
+
+/* --- Scrollbar (Windows 3.1 style) --- */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track {
+    background: var(--win-face);
+    border-left: 1px solid var(--win-mid);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--win-face);
+    border: 1px outset var(--win-light);
+    box-shadow: inset -1px -1px 0 var(--win-dark), inset 1px 1px 0 var(--win-light);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #d4d4d4;
+}
+::-webkit-scrollbar-button {
+    height: 16px;
+    background: var(--win-face);
+    border: 1px outset var(--win-light);
+}
 
 /* ============================================================
-   CRT OVERLAY — Scanlines + Vignette
+   CRT OVERLAY — Subtle scanlines + Barrel curvature
    ============================================================ */
 #crt-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 10000;
+    /* Very subtle scanlines */
     background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.12) 2px, rgba(0, 0, 0, 0.12) 4px
+        0deg, transparent, transparent 3px,
+        rgba(0, 0, 0, 0.03) 3px, rgba(0, 0, 0, 0.03) 4px
     );
-    animation: crt-flicker 0.1s infinite alternate;
 }
 
+/* Barrel curvature via border-radius + vignette */
 #crt-overlay::before {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.5) 100%);
+    border-radius: 12px;
 }
 
-@keyframes crt-flicker { 0% { opacity: 0.97; } 100% { opacity: 1; } }
+/* Curved screen edge effect */
+#crt-overlay::after {
+    content: ''; position: absolute; top: -2px; left: -2px;
+    right: -2px; bottom: -2px;
+    border: 3px solid rgba(0,0,0,0.8);
+    border-radius: 18px;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.4), inset 0 0 120px rgba(0,0,0,0.2);
+    pointer-events: none;
+}
 
 /* ============================================================
-   LOGIN SCREEN — Matched to Image 3
+   LOGIN SCREEN — Image 3
    ============================================================ */
 #login-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: #0a0a0a;
-    /* Faint vertical scanlines from Image 3 */
     background-image: repeating-linear-gradient(
         90deg, transparent, transparent 3px,
         rgba(51, 255, 51, 0.015) 3px, rgba(51, 255, 51, 0.015) 4px
@@ -260,7 +298,7 @@ html, body {
 }
 
 /* ============================================================
-   MAGIC WORD — Small popup in bottom-right (Image 1)
+   MAGIC WORD POPUP
    ============================================================ */
 #magic-word-popup {
     position: fixed;
@@ -283,9 +321,7 @@ html, body {
     font-weight: bold;
 }
 
-.magic-word-icon {
-    font-size: 14px;
-}
+.magic-word-icon { font-size: 14px; }
 
 #magic-word-body {
     padding: 10px;
@@ -387,20 +423,25 @@ html, body {
 }
 
 /* ============================================================
-   DESKTOP — Dark teal background (Image 1)
+   DESKTOP — Teal textured background
    ============================================================ */
 #desktop {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: var(--desktop-bg);
     background: var(--desktop-bg-gradient);
+    /* Subtle teal texture crosshatch */
+    background-image:
+        var(--desktop-bg-gradient),
+        repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.008) 1px, rgba(255,255,255,0.008) 2px),
+        repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(255,255,255,0.008) 1px, rgba(255,255,255,0.008) 2px);
 }
 
-/* JP Logo watermark — centered, translucent (Image 1) */
+/* JP Logo watermark */
 #desktop-watermark {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0.07;
+    opacity: 0.06;
     pointer-events: none;
     z-index: 0;
 }
@@ -412,7 +453,7 @@ html, body {
 }
 
 /* ============================================================
-   DESKTOP ICONS — Matched to Image 1
+   DESKTOP ICONS
    ============================================================ */
 #desktop-icons {
     position: absolute;
@@ -441,21 +482,31 @@ html, body {
     margin-top: 4px; text-align: center;
 }
 
-/* Icon graphics — matching Image 1 colors */
+/* Icon graphics */
 .icon-img {
     width: 48px; height: 48px;
     display: flex; align-items: center; justify-content: center;
     position: relative;
 }
 
-/* Yellow folder icon (Image 1: Island_Map) */
 .icon-folder-yellow {
-    background: var(--crt-yellow);
-    border: 2px solid #b8a030;
-    clip-path: polygon(0 18%, 45% 18%, 55% 0, 100% 0, 100% 100%, 0 100%);
+    width: 44px; height: 32px;
+    background: linear-gradient(180deg, #f0d050 0%, #d8b828 100%);
+    border: 2px solid #a89020;
+    border-radius: 0 3px 3px 3px;
+    position: relative;
+    box-shadow: 1px 2px 2px rgba(0,0,0,0.3);
+}
+.icon-folder-yellow::before {
+    content: '';
+    position: absolute; top: -7px; left: 0;
+    width: 18px; height: 7px;
+    background: #e8c840;
+    border: 2px solid #a89020;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
 }
 
-/* Blue circle icon (Image 1: System_Comp) */
 .icon-system {
     width: 44px; height: 44px;
     border: 3px solid #4488cc;
@@ -463,7 +514,6 @@ html, body {
     background: transparent;
 }
 
-/* Red alert icon (Image 1: Security_Log) */
 .icon-alert-red {
     width: 44px; height: 44px;
     border: 3px solid var(--crt-red);
@@ -479,87 +529,118 @@ html, body {
 }
 
 /* ============================================================
-   WINDOW SYSTEM — IRIX style (Image 1 & 2)
+   WINDOW SYSTEM — Windows 3.1 Beveled Gray
    ============================================================ */
 .irix-window {
     position: absolute;
-    min-width: 200px; min-height: 100px;
-    background: var(--bg-window);
-    border: 1px solid var(--border-teal);
-    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+    min-width: 200px; min-height: 120px;
+    background: var(--win-face);
+    /* Win 3.1 3D border: light top-left, dark bottom-right */
+    border: 2px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    box-shadow: 1px 1px 0 var(--win-shadow);
     display: flex; flex-direction: column;
     z-index: 100;
+    outline: 1px solid var(--win-shadow);
 }
 
 .irix-window.focused {
-    border-color: var(--crt-green-muted);
-    box-shadow: 0 0 10px rgba(51, 255, 51, 0.1), 3px 3px 0 rgba(0, 0, 0, 0.4);
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
 }
 
-/* Teal gradient title bar (Image 1: Explorer window) */
+.irix-window.maximized .resize-handle { display: none; }
+
+/* Title bar — Windows 3.1 blue gradient */
 .window-titlebar {
     display: flex; align-items: center;
-    background: var(--titlebar-teal);
-    border-bottom: 1px solid var(--border-teal);
-    padding: 2px 6px; cursor: move;
-    height: 26px; flex-shrink: 0;
+    background: var(--win-titlebar-active);
+    padding: 2px 3px; cursor: move;
+    height: 22px; flex-shrink: 0;
 }
 
-/* Dark title bar variant (Image 1: Terminal window) */
+.irix-window:not(.focused) .window-titlebar {
+    background: var(--win-titlebar-inactive);
+}
+
+/* Dark variant for terminal */
 .window-titlebar.dark {
-    background: var(--titlebar-dark);
-    border-bottom-color: #444;
+    background: linear-gradient(90deg, #2a2a2a 0%, #505050 100%);
+}
+.irix-window:not(.focused) .window-titlebar.dark {
+    background: var(--win-titlebar-inactive);
 }
 
-/* Navy title bar variant (Image 2: File Navigator) */
+/* Navy variant for file navigator */
 .window-titlebar.navy {
-    background: var(--titlebar-navy);
-    border-bottom-color: #2a3a5a;
+    background: var(--win-titlebar-active);
 }
 
 .window-titlebar-icon {
     width: 16px; height: 16px;
-    margin-right: 6px;
-    font-size: 12px;
+    margin-right: 4px;
+    font-size: 11px;
     display: flex; align-items: center; justify-content: center;
-    color: var(--crt-green);
+    color: #fff;
 }
 
 .window-title {
     flex: 1;
-    font-family: var(--font-mono); font-size: 12px;
-    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    font-family: var(--font-mono); font-size: 12px; font-weight: bold;
+    color: var(--win-title-text-active);
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    text-shadow: none;
 }
 
-.window-controls { display: flex; gap: 3px; }
+.irix-window:not(.focused) .window-title {
+    color: var(--win-title-text-inactive);
+}
+
+/* Window buttons — Windows 3.1 beveled gray squares */
+.window-controls { display: flex; gap: 2px; }
 
 .window-btn {
-    width: 18px; height: 18px;
-    border: 1px solid var(--border-teal);
-    background: rgba(0,0,0,0.3);
-    color: var(--crt-green);
-    font-family: var(--font-terminal); font-size: 12px;
+    width: 18px; height: 16px;
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    background: var(--win-face);
+    color: #000;
+    font-family: var(--font-terminal); font-size: 11px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; padding: 0; line-height: 1;
 }
 
-.window-btn:hover {
-    background: rgba(51, 255, 51, 0.1);
-    border-color: var(--crt-green);
+.window-btn:active {
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
 }
 
 .window-body {
     flex: 1; overflow: auto; padding: 0; position: relative;
+    /* Sunken 3D border inside */
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+    background: var(--bg-dark);
 }
 
-/* Explorer windows need light background to match Image 1 */
+/* Explorer windows get light background */
 .irix-window[data-type="explorer"] .window-body {
-    background: #e8e8e0;
+    background: var(--explorer-bg);
 }
 
 /* ============================================================
-   TERMINAL — Green-on-dark (Image 1)
+   RESIZE HANDLES
+   ============================================================ */
+.resize-handle { position: absolute; z-index: 10; }
+.resize-r { top: 0; right: -4px; width: 6px; height: 100%; cursor: e-resize; }
+.resize-b { bottom: -4px; left: 0; width: 100%; height: 6px; cursor: s-resize; }
+.resize-l { top: 0; left: -4px; width: 6px; height: 100%; cursor: w-resize; }
+.resize-t { top: -4px; left: 0; width: 100%; height: 6px; cursor: n-resize; }
+.resize-br { bottom: -6px; right: -6px; width: 12px; height: 12px; cursor: se-resize; }
+.resize-bl { bottom: -6px; left: -6px; width: 12px; height: 12px; cursor: sw-resize; }
+.resize-tr { top: -6px; right: -6px; width: 12px; height: 12px; cursor: ne-resize; }
+.resize-tl { top: -6px; left: -6px; width: 12px; height: 12px; cursor: nw-resize; }
+
+/* ============================================================
+   TERMINAL — Green-on-dark
    ============================================================ */
 .terminal-body {
     padding: 8px;
@@ -595,31 +676,34 @@ html, body {
 .output-header { color: var(--crt-amber); text-shadow: var(--phosphor-glow-amber); }
 
 /* ============================================================
-   EXPLORER — Image 1: light gray bg, yellow 3D folder icons
-   Uses .exp-* class prefix
+   EXPLORER — Light bg, yellow 3D folder icons
    ============================================================ */
 .exp-pathbar {
     display: flex; align-items: center;
-    background: #c8c8c0;
-    border-bottom: 2px solid #a8a8a0;
+    background: var(--win-face);
+    border-bottom: 1px solid var(--win-mid);
     padding: 3px 8px;
     font-family: var(--font-mono); font-size: 12px;
-    color: #222; gap: 6px;
+    color: #000; gap: 6px;
 }
 
 .exp-pathbar-up {
-    cursor: pointer; color: #222;
+    cursor: pointer; color: #000;
     font-size: 12px; padding: 1px 6px;
-    border: 1px solid #aaa; background: #e0e0d8;
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    background: var(--win-face);
     font-family: var(--font-mono);
 }
-.exp-pathbar-up:hover { background: #f0f0e8; }
+.exp-pathbar-up:hover { background: #d4d4d4; }
+.exp-pathbar-up:active {
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+}
 
-.exp-pathbar-text { color: #222; }
+.exp-pathbar-text { color: #000; }
 
-/* Image 1: white/light gray content area with folder grid */
 .exp-content {
-    background: #e8e8e0;
+    background: #fff;
     padding: 20px 15px;
     display: flex; flex-wrap: wrap;
     align-content: flex-start;
@@ -632,7 +716,6 @@ html, body {
     font-family: var(--font-mono); font-size: 12px;
 }
 
-/* Each folder/file item — grid layout like Image 1 */
 .exp-item {
     display: flex; flex-direction: column;
     align-items: center; width: 90px;
@@ -640,36 +723,36 @@ html, body {
     border: 1px solid transparent; border-radius: 2px;
 }
 .exp-item:hover {
-    background: rgba(0, 80, 180, 0.12);
-    border-color: #8888cc;
+    background: #000080;
+    border-color: #000080;
 }
+.exp-item:hover .exp-label { color: #fff; }
 
-/* Yellow 3D folder icon — simpler approach for reliability */
+/* Yellow 3D folder icon */
 .exp-folder-icon {
-    width: 54px; height: 36px;
+    width: 48px; height: 32px;
     background: linear-gradient(180deg, #f0d050 0%, #d8b828 50%, #c8a818 100%);
-    border: 2px solid #a89020;
+    border: 1px solid #a08820;
     border-radius: 0 2px 2px 2px;
     position: relative;
-    box-shadow: 1px 2px 3px rgba(0,0,0,0.25);
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
 }
-/* Folder tab */
 .exp-folder-icon::before {
     content: '';
     position: absolute;
-    top: -8px; left: 0;
-    width: 22px; height: 8px;
+    top: -7px; left: 0;
+    width: 20px; height: 7px;
     background: #e8c840;
-    border: 2px solid #a89020;
+    border: 1px solid #a08820;
     border-bottom: none;
-    border-radius: 3px 3px 0 0;
+    border-radius: 2px 2px 0 0;
 }
 
-/* File/document icon — simple page with corner fold */
+/* File/document icon */
 .exp-file-icon {
-    width: 38px; height: 44px;
-    background: #f8f8f0;
-    border: 2px solid #999;
+    width: 34px; height: 40px;
+    background: #fff;
+    border: 1px solid #000;
     position: relative;
 }
 .exp-file-icon::before {
@@ -677,112 +760,110 @@ html, body {
     position: absolute; top: 0; right: 0;
     width: 0; height: 0;
     border-style: solid;
-    border-width: 0 10px 10px 0;
-    border-color: transparent #ccc transparent transparent;
+    border-width: 0 8px 8px 0;
+    border-color: transparent #c0c0c0 transparent transparent;
 }
 .exp-file-icon::after {
     content: '';
     position: absolute; top: 0; right: 0;
-    width: 10px; height: 10px;
-    background: #e8e8e0;
-    border-left: 1px solid #999;
-    border-bottom: 1px solid #999;
+    width: 8px; height: 8px;
+    background: #fff;
+    border-left: 1px solid #000;
+    border-bottom: 1px solid #000;
 }
 
 .exp-label {
     font-family: var(--font-mono); font-size: 11px;
-    color: #222; text-align: center;
+    color: #000; text-align: center;
     word-break: break-all; margin-top: 4px; line-height: 1.2;
 }
 
 /* ============================================================
-   FILE NAVIGATOR — Image 2: exact pixel match
-   Navy title bar, gray menu bar, toolbar, sidebar, doc viewer, status bar
-   Uses .fn-* class prefix
+   FILE NAVIGATOR — Image 2 match with Win 3.1 chrome
    ============================================================ */
-
-/* Menu bar — gray bar with underlined menu items (Image 2) */
 .fn-menubar {
     display: flex; align-items: center;
-    background: #c0c0b8;
-    border-bottom: 1px solid #999;
+    background: var(--win-face);
+    border-bottom: 1px solid var(--win-mid);
     padding: 2px 0; flex-shrink: 0;
     font-family: var(--font-ui); font-size: 13px;
 }
 .fn-menu-item {
-    padding: 2px 14px; color: #222; cursor: default;
+    padding: 2px 14px; color: #000; cursor: default;
 }
 .fn-menu-item u { text-decoration: underline; }
 .fn-menu-item:hover {
-    background: #1a3a5a; color: #fff;
+    background: #000080; color: #fff;
 }
 
-/* Toolbar — light gray bar with Up button and search (Image 2) */
 .fn-toolbar {
     display: flex; align-items: center;
-    background: #d0d0c8;
-    border-bottom: 1px solid #aaa;
+    background: var(--win-face);
+    border-bottom: 1px solid var(--win-mid);
     padding: 3px 8px; gap: 8px; flex-shrink: 0;
 }
 .fn-toolbar-btn {
     font-family: var(--font-mono); font-size: 12px;
-    background: #e0e0d8; border: 1px outset #ccc;
-    padding: 2px 10px; color: #222; cursor: default;
+    background: var(--win-face);
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    padding: 2px 10px; color: #000; cursor: default;
 }
-.fn-toolbar-btn:hover { background: #f0f0e8; }
+.fn-toolbar-btn:hover { background: #d4d4d4; }
+.fn-toolbar-btn:active {
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+}
 .fn-searchbar {
     flex: 1; display: flex; align-items: center;
-    background: #fff; border: 1px solid #888;
+    background: #fff;
+    border: 2px solid;
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
     padding: 1px 4px; gap: 4px;
 }
 .fn-search-icon { font-size: 12px; }
 .fn-search-input {
     flex: 1; border: none; outline: none;
     font-family: var(--font-mono); font-size: 12px;
-    color: #222; background: transparent;
+    color: #000; background: transparent;
 }
 
-/* Main body — sidebar + doc area (Image 2) */
 .fn-main {
     display: flex; flex: 1; overflow: hidden;
 }
 
-/* Left sidebar — folder tree with yellow folder icons (Image 2) */
 .fn-sidebar {
     width: 140px; flex-shrink: 0;
-    background: #d8d8d0;
-    border-right: 1px solid #aaa;
+    background: var(--win-face);
+    border-right: 1px solid var(--win-mid);
     overflow-y: auto; padding: 2px 0;
     font-family: var(--font-mono); font-size: 12px;
 }
 .fn-sidebar-item {
     display: flex; align-items: center;
     padding: 2px 4px; cursor: pointer;
-    color: #222; gap: 3px; white-space: nowrap;
+    color: #000; gap: 3px; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
 }
-.fn-sidebar-item:hover { background: #c0c0b8; }
+.fn-sidebar-item:hover { background: #d4d4d4; }
 .fn-sidebar-item.active {
-    background: #1a3a5a; color: #fff;
+    background: #000080; color: #fff;
 }
 .fn-sidebar-child { padding-left: 16px; }
 .fn-sidebar-root { font-weight: bold; }
 .fn-sidebar-icon { font-size: 11px; width: 16px; text-align: center; flex-shrink: 0; }
 
-/* Document area (Image 2) */
 .fn-doc-area {
     flex: 1; display: flex; flex-direction: column;
     overflow: hidden;
 }
 .fn-doc-header {
     display: flex; justify-content: space-between;
-    background: #2a3a5a; color: #8899aa;
+    background: #000080; color: #c0c0ff;
     font-family: var(--font-mono); font-size: 11px;
-    padding: 3px 8px; border-bottom: 1px solid #1a2a3a;
+    padding: 3px 8px; border-bottom: 1px solid #000050;
     flex-shrink: 0;
 }
 
-/* Document content — Image 2: dark blue-black bg, green text */
 .fn-doc-content {
     flex: 1; overflow-y: auto;
     background: #0c1820;
@@ -792,30 +873,27 @@ html, body {
     line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;
 }
 
-/* Green cursor block at bottom (Image 2) */
 .fn-doc-content::after {
     content: '█';
     color: var(--crt-green); animation: cursor-blink 1s infinite;
 }
 
-/* Status bar — gray bar at bottom (Image 2) */
 .fn-statusbar {
     display: flex; align-items: center;
-    background: #c0c0b8;
-    border-top: 1px solid #999;
+    background: var(--win-face);
+    border-top: 1px solid var(--win-mid);
     font-family: var(--font-mono); font-size: 11px;
-    color: #222; flex-shrink: 0; height: 20px;
+    color: #000; flex-shrink: 0; height: 20px;
 }
 .fn-status-cell {
     padding: 0 10px;
-    border-right: 1px solid #999;
+    border-right: 1px solid var(--win-mid);
     height: 100%; display: flex; align-items: center;
 }
 .fn-status-cell:last-child { border-right: none; }
 .fn-status-flex { flex: 1; }
 .fn-status-green { color: #c88030; }
 
-/* Classified tag (Image 2: green bordered box) */
 .doc-classified {
     color: var(--crt-green); font-weight: bold;
     background: rgba(51, 255, 51, 0.08);
@@ -825,8 +903,7 @@ html, body {
 }
 
 /* ============================================================
-   CAMERA FEED — Image 1: top-right, actual camera image
-   Uses .cam-* class prefix
+   CAMERA FEED — Top-right, actual camera image
    ============================================================ */
 .cam-body {
     height: 100%; position: relative;
@@ -838,16 +915,29 @@ html, body {
     filter: grayscale(40%) contrast(1.1) brightness(0.8);
     opacity: 0.85;
 }
-/* Scanline overlay on camera */
+/* Very subtle scanline on camera */
 .cam-body::before {
     content: ''; position: absolute; top: 0; left: 0;
     width: 100%; height: 100%; pointer-events: none;
     background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 4px
+        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
     );
     z-index: 2;
 }
+/* Static noise overlay (toggled via JS) */
+.cam-static {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect fill="%23fff" opacity="0.04" x="0" y="0" width="1" height="1"/><rect fill="%23fff" opacity="0.04" x="1" y="1" width="1" height="1"/></svg>');
+    background-size: 4px 4px;
+    opacity: 0;
+    z-index: 4;
+    transition: opacity 0.1s;
+    pointer-events: none;
+}
+.cam-static.active { opacity: 1; }
+
 .cam-rec {
     position: absolute; top: 6px; right: 8px;
     font-family: var(--font-terminal); font-size: 12px;
@@ -857,7 +947,13 @@ html, body {
 }
 @keyframes rec-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }
 
-/* Green border at bottom of camera (Image 1 shows thin green line) */
+.cam-timestamp {
+    position: absolute; bottom: 6px; left: 8px;
+    font-family: var(--font-terminal); font-size: 10px;
+    color: #ccc; text-shadow: 0 0 2px rgba(0,0,0,0.8);
+    z-index: 3;
+}
+
 .cam-body::after {
     content: ''; position: absolute; bottom: 0; left: 0;
     width: 100%; height: 2px;
@@ -938,32 +1034,39 @@ html, body {
 .feed-timestamp { color: var(--crt-amber); margin-right: 6px; }
 
 /* ============================================================
-   TASKBAR — Image 1 style
+   TASKBAR — Windows 3.1 Gray Beveled
    ============================================================ */
 #taskbar {
     position: fixed; bottom: 0; left: 0;
-    width: 100%; height: 30px;
-    background: var(--taskbar-bg);
-    border-top: 1px solid var(--taskbar-border);
+    width: 100%; height: 32px;
+    background: var(--win-face);
+    border-top: 2px solid;
+    border-color: var(--win-light) transparent transparent var(--win-light);
     display: flex; align-items: center;
     z-index: 5000;
+    padding: 2px 4px;
 }
 
 #taskbar-start {
-    padding: 0 4px;
-    border-right: 1px solid var(--border-teal);
+    padding: 0;
     height: 100%; display: flex; align-items: center;
+    margin-right: 4px;
 }
 
 #start-button {
-    font-family: var(--font-mono); font-size: 12px;
-    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    font-family: var(--font-mono); font-size: 12px; font-weight: bold;
+    color: #000;
     padding: 2px 10px; cursor: pointer;
-    border: 1px solid var(--border-teal);
-    background: var(--bg-panel);
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    background: var(--win-face);
+    height: 24px; display: flex; align-items: center;
 }
 
-#start-button:hover { background: rgba(42, 102, 102, 0.3); }
+#start-button:hover { background: #d4d4d4; }
+#start-button:active {
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+}
 
 #taskbar-tabs {
     flex: 1; display: flex; align-items: center;
@@ -972,27 +1075,32 @@ html, body {
 
 .taskbar-tab {
     font-family: var(--font-mono); font-size: 11px;
-    color: var(--crt-green-dim);
+    color: #000;
     padding: 3px 12px;
-    border: 1px solid var(--border-teal);
-    background: var(--bg-panel);
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    background: var(--win-face);
     cursor: pointer; white-space: nowrap;
     max-width: 160px; overflow: hidden; text-overflow: ellipsis;
+    height: 22px; display: flex; align-items: center;
 }
 
-.taskbar-tab:hover { color: var(--crt-green); border-color: var(--crt-green-dim); }
+.taskbar-tab:hover { background: #d4d4d4; }
 
 .taskbar-tab.active {
-    color: var(--crt-green); background: rgba(42, 102, 102, 0.3);
-    border-color: var(--crt-green-muted); text-shadow: var(--phosphor-glow);
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+    background: #d8d8d8;
+    font-weight: bold;
 }
 
 #taskbar-clock {
-    font-family: var(--font-terminal); font-size: 14px;
-    color: var(--crt-green); text-shadow: var(--phosphor-glow);
+    font-family: var(--font-mono); font-size: 12px;
+    color: #000;
     padding: 0 12px;
-    border-left: 1px solid var(--border-teal);
-    height: 100%; display: flex; align-items: center;
+    border: 1px solid;
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+    height: 22px; display: flex; align-items: center;
+    background: var(--win-face);
 }
 
 /* ============================================================
@@ -1002,18 +1110,19 @@ html, body {
 
 .ledger-toolbar {
     display: flex; gap: 4px; padding: 4px 8px;
-    background: rgba(26, 68, 68, 0.5);
-    border-bottom: 1px solid var(--border-teal);
+    background: var(--win-face);
+    border-bottom: 1px solid var(--win-mid);
 }
 
 .ledger-btn {
     font-family: var(--font-mono); font-size: 11px;
-    color: var(--crt-green); background: var(--bg-dark);
-    border: 1px solid var(--border-teal);
+    color: #000; background: var(--win-face);
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
     padding: 2px 10px; cursor: pointer;
 }
 
-.ledger-btn:hover { background: rgba(42, 102, 102, 0.3); }
+.ledger-btn:hover { background: #d4d4d4; }
 
 .ledger-textarea {
     flex: 1; background: var(--bg-dark); border: none; outline: none;
@@ -1051,4 +1160,364 @@ html, body {
 .text-dim { color: var(--crt-green-dim); }
 .text-green { color: var(--crt-green); text-shadow: var(--phosphor-glow); }
 
-::selection { background: rgba(51, 255, 51, 0.3); color: var(--crt-green); }
+::selection { background: rgba(0, 0, 128, 0.5); color: #fff; }
+
+/* ============================================================
+   EVIDENCE TRACKER WINDOW
+   ============================================================ */
+.evidence-tracker-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #000;
+    font-family: 'Courier New', monospace;
+    color: var(--crt-green);
+}
+
+.evidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+}
+
+.evidence-title {
+    font-size: 11px;
+    color: var(--crt-amber);
+    text-shadow: var(--phosphor-glow-amber);
+    letter-spacing: 1px;
+}
+
+.evidence-counter {
+    font-size: 12px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    font-weight: bold;
+}
+
+.evidence-submit-bar {
+    display: flex;
+    padding: 6px;
+    gap: 6px;
+    background: #111;
+    border-bottom: 1px solid #333;
+}
+
+.evidence-input {
+    flex: 1;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: var(--crt-green);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 4px 8px;
+    outline: none;
+}
+
+.evidence-input:focus {
+    border-color: var(--crt-green);
+    box-shadow: 0 0 4px var(--crt-green-dim);
+}
+
+.evidence-input::placeholder {
+    color: #444;
+}
+
+.evidence-btn {
+    background: #333;
+    border: 2px outset #666;
+    color: var(--crt-green);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    padding: 3px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
+.evidence-btn:active {
+    border-style: inset;
+}
+
+.evidence-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.evidence-log-header {
+    color: #555;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.evidence-entry {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dotted #222;
+}
+
+.evidence-entry-path {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.evidence-entry-response {
+    color: #888;
+    padding-left: 16px;
+    white-space: pre-wrap;
+}
+
+.evidence-critical .evidence-entry-path { color: var(--crt-green); text-shadow: var(--phosphor-glow); }
+.evidence-critical .evidence-entry-response { color: var(--crt-green); }
+.evidence-motive .evidence-entry-path { color: var(--crt-amber); }
+.evidence-motive .evidence-entry-response { color: var(--crt-amber); opacity: 0.8; }
+.evidence-irrelevant .evidence-entry-path { color: var(--crt-red); }
+.evidence-irrelevant .evidence-entry-response { color: var(--crt-red); opacity: 0.8; }
+.evidence-duplicate .evidence-entry-path { color: #666; }
+.evidence-not_found .evidence-entry-path { color: #666; }
+.evidence-directory .evidence-entry-path { color: #666; }
+
+/* ============================================================
+   TALK WINDOW (Unix talk utility)
+   ============================================================ */
+.talk-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #000;
+    font-family: 'Courier New', monospace;
+    color: var(--crt-green);
+}
+
+.talk-header {
+    padding: 4px 10px;
+    background: #1a1a1a;
+    color: var(--crt-green-dim);
+    font-size: 11px;
+    border-bottom: 1px solid #333;
+    text-align: center;
+}
+
+.talk-split {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.talk-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.talk-label {
+    padding: 3px 8px;
+    background: #111;
+    color: var(--crt-amber);
+    font-size: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.talk-divider {
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--crt-green-dim), transparent);
+}
+
+.talk-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.talk-msg {
+    margin-bottom: 8px;
+    color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.talk-msg.talk-player {
+    color: var(--crt-cyan);
+    text-shadow: 0 0 6px rgba(0, 205, 255, 0.3);
+}
+
+.talk-input-area {
+    padding: 6px;
+    background: #0a0a0a;
+    border-top: 1px solid #333;
+}
+
+.talk-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--crt-cyan);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 4px;
+    outline: none;
+    caret-color: var(--crt-cyan);
+}
+
+.talk-input::placeholder {
+    color: #333;
+}
+
+/* ============================================================
+   MISSION BRIEFING POPUP
+   ============================================================ */
+.briefing-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.briefing-window {
+    width: 520px;
+    max-width: 90vw;
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+}
+
+.briefing-titlebar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: white;
+    padding: 3px 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.briefing-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.briefing-text {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+    border: 2px inset #888;
+    padding: 12px;
+    margin-bottom: 12px;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+}
+
+.briefing-btn {
+    background: #c0c0c0;
+    border: 2px outset #dfdfdf;
+    padding: 4px 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
+.briefing-btn:active {
+    border-style: inset;
+}
+
+.briefing-btn:focus {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+}
+
+/* ============================================================
+   MOBILE RESTRICTION SCREEN
+   Hidden on desktop, shown on screens < 900px
+   ============================================================ */
+#mobile-block {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-block-inner {
+    max-width: 380px;
+    padding: 40px 30px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    color: #aaa;
+}
+
+.mobile-block-line {
+    height: 1px;
+    background: #333;
+    margin: 16px 0;
+}
+
+.mobile-block-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #c0c0c0;
+    letter-spacing: 4px;
+    margin: 0;
+}
+
+.mobile-block-org {
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 3px;
+    margin: 20px 0;
+}
+
+.mobile-block-body {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #888;
+    margin: 10px 0;
+}
+
+.mobile-block-ref {
+    font-size: 10px;
+    color: #444;
+    margin-top: 30px;
+}
+
+@media (max-width: 900px) {
+    #mobile-block {
+        display: flex;
+    }
+    #crt-overlay,
+    #login-screen,
+    #boot-screen,
+    #desktop,
+    .briefing-overlay {
+        display: none !important;
+    }
+}

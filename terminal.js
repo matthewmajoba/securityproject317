@@ -91,7 +91,9 @@ const Terminal = (() => {
             case 'vitals': cmdVitals(output, args); break;
             case 'ledger': cmdLedger(); break;
             case 'submit_audit': cmdSubmitAudit(output); break;
-            case 'evidence': appendOutput(output, Puzzles.getEvidenceStatus()); break;
+            case 'evidence': Puzzles.openEvidenceTracker(); break;
+            case 'talk': cmdTalk(output, args); break;
+            case 'brief': Puzzles.showMissionBriefing(); break;
             case 'whoami': appendOutput(output, '<span class="output-info">contractor_forensics (InGen Security Clearance: Level 4)</span>'); break;
             case 'date': appendOutput(output, '<span class="output-info">Sat Jun 12 04:15:33 CST 1993</span>'); break;
             case 'uname':
@@ -121,8 +123,8 @@ const Terminal = (() => {
         appendOutput(output, `<span class="output-header">═══ JP FORENSIC WORKSTATION — COMMAND REFERENCE ═══</span>
 
 <span class="text-amber">NAVIGATION:</span>
-  <span class="text-cyan">ls [-l]</span>          List directory contents
-                   <span class="output-dim">-l flag reveals "last modified" timestamps</span>
+  <span class="text-cyan">ls [-l] [-a]</span>    List directory contents
+                   <span class="output-dim">-l for details, -a to show hidden files</span>
   <span class="text-cyan">cd [path]</span>        Change directory
   <span class="text-cyan">pwd</span>              Print working directory
   <span class="text-cyan">cat [file]</span>       Print file contents
@@ -130,14 +132,16 @@ const Terminal = (() => {
   <span class="text-cyan">clear</span>            Clear terminal
 
 <span class="text-amber">FORENSIC TOOLS:</span>
-  <span class="text-cyan">binwalk [file]</span>   Scan for hidden data offsets (Steganography)
-  <span class="text-cyan">decode [file] --align</span>  Bit-alignment tool for corrupted files
-  <span class="text-cyan">vitals [paddock]</span> Open telemetry for a specific paddock
+  <span class="text-cyan">binwalk [file]</span>   Scan for hidden data offsets
+  <span class="text-cyan">decode [file] --align</span>  Bit-alignment recovery tool
+  <span class="text-cyan">vitals [paddock]</span> Open telemetry for a paddock
 
 <span class="text-amber">CASE MANAGEMENT:</span>
-  <span class="text-cyan">ledger</span>           Open persistent Case_Notes.md
-  <span class="text-cyan">evidence</span>         View collected evidence flags
-  <span class="text-cyan">submit_audit</span>     Package discovered evidence (endgame)
+  <span class="text-cyan">evidence</span>         Open Evidence Tracker window
+  <span class="text-cyan">brief</span>            Re-read the mission briefing
+  <span class="text-cyan">ledger</span>           Open persistent Case Notes
+  <span class="text-cyan">talk reeves</span>      Contact your handler
+  <span class="text-cyan">submit_audit</span>     Package evidence (endgame)
 
 <span class="text-amber">SYSTEM:</span>
   <span class="text-cyan">access [path] [token]</span>  Authenticate with bypass token
@@ -178,9 +182,13 @@ const Terminal = (() => {
             return;
         }
 
+        // Filter hidden dotfiles unless -a flag is present
+        const showAll = args.some(a => a === '-a' || a === '-la' || a === '-al');
+        const visibleEntries = showAll ? entries : entries.filter(e => !e.name.startsWith('.'));
+
         if (longFormat) {
-            let lines = [`<span class="output-dim">total ${entries.length}</span>`];
-            for (const e of entries) {
+            let lines = [`<span class="output-dim">total ${visibleEntries.length}</span>`];
+            for (const e of visibleEntries) {
                 const typeChar = e.type === VFS.DIR ? 'd' : '-';
                 const perms = e.type === VFS.DIR ? 'rwxr-xr-x' : 'rw-r--r--';
                 const size = (e.size || '0').padStart(6);
@@ -193,12 +201,181 @@ const Terminal = (() => {
             }
             appendOutput(output, lines.join('\n'));
         } else {
-            const names = entries.map(e => {
+            const names = visibleEntries.map(e => {
                 if (e.type === VFS.DIR) return `<span class="text-cyan">${escapeHtml(e.name)}/</span>`;
                 return escapeHtml(e.name);
             });
             appendOutput(output, names.join('  '));
         }
+    }
+
+    /* --- TALK --- */
+    function cmdTalk(output, args) {
+        if (!args[0] || args[0].toLowerCase() !== 'reeves') {
+            appendOutput(output, '<span class="output-dim">Usage: talk reeves</span>');
+            return;
+        }
+
+        const win = WindowManager.createWindow('talk — M. Reeves @ InGen', 'talk', {
+            width: 520, height: 380, singleInstance: 'talk-reeves'
+        });
+        const body = WindowManager.getBody(win.id);
+        body.classList.add('talk-body');
+
+        body.innerHTML = `
+            <div class="talk-header">[Connection to reeves@ingen.com established]</div>
+            <div class="talk-split">
+                <div class="talk-pane">
+                    <div class="talk-label">[ M. Reeves — InGen Security ]</div>
+                    <div class="talk-messages" id="${win.id}-boss"></div>
+                </div>
+                <div class="talk-divider"></div>
+                <div class="talk-pane">
+                    <div class="talk-label">[ Contractor — Forensics ]</div>
+                    <div class="talk-input-area">
+                        <input type="text" class="talk-input" id="${win.id}-input" 
+                            placeholder="Type a message..." autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>`;
+
+        const bossPane = document.getElementById(`${win.id}-boss`);
+        const talkInput = document.getElementById(`${win.id}-input`);
+
+        // Type out boss message with natural "jazz" cadence
+        // Variable speed: bursts of fast typing, pauses at punctuation,
+        // slight hesitation at word starts, occasional typo + correction
+        function typeMessage(text, callback) {
+            const msgEl = document.createElement('div');
+            msgEl.className = 'talk-msg';
+            bossPane.appendChild(msgEl);
+            let i = 0;
+            let currentText = '';
+
+            function getDelay(char, nextChar, prevChar) {
+                // Long pauses after sentence-ending punctuation
+                if ('.!?'.includes(char)) return 180 + Math.random() * 300;
+                // Medium pause after commas, dashes
+                if (',;:—–'.includes(char)) return 100 + Math.random() * 150;
+                // Slight pause at start of new word (thinking)
+                if (prevChar === ' ') return 60 + Math.random() * 100;
+                // Fast burst for common letter sequences
+                if ('etaoinshrdlu'.includes(char.toLowerCase())) return 25 + Math.random() * 35;
+                // Slightly slower for less common chars  
+                return 35 + Math.random() * 55;
+            }
+
+            function shouldTypo() {
+                // ~3% chance per character, never on spaces/punctuation
+                return Math.random() < 0.03;
+            }
+
+            function getTypoChar(intended) {
+                // Pick an adjacent key on QWERTY
+                const neighbors = {
+                    'a':'sq','b':'vn','c':'xv','d':'sf','e':'wr','f':'dg',
+                    'g':'fh','h':'gj','i':'uo','j':'hk','k':'jl','l':'k;',
+                    'm':'n,','n':'bm','o':'ip','p':'o[','q':'wa','r':'et',
+                    's':'ad','t':'ry','u':'yi','v':'cb','w':'qe','x':'zc',
+                    'y':'tu','z':'xa'
+                };
+                const key = intended.toLowerCase();
+                const adj = neighbors[key];
+                if (!adj) return intended;
+                const typoChar = adj[Math.floor(Math.random() * adj.length)];
+                return intended === intended.toUpperCase() ? typoChar.toUpperCase() : typoChar;
+            }
+
+            function typeNext() {
+                if (i >= text.length) {
+                    bossPane.scrollTop = bossPane.scrollHeight;
+                    if (callback) setTimeout(callback, 500);
+                    return;
+                }
+
+                const char = text[i];
+                const prevChar = i > 0 ? text[i-1] : '';
+                const nextChar = i < text.length - 1 ? text[i+1] : '';
+
+                // Occasional typo on letters only
+                if (char.match(/[a-zA-Z]/) && shouldTypo() && i > 5) {
+                    const wrong = getTypoChar(char);
+                    currentText += wrong;
+                    msgEl.textContent = currentText;
+                    bossPane.scrollTop = bossPane.scrollHeight;
+
+                    // Pause — "notice" the typo
+                    setTimeout(() => {
+                        // Backspace
+                        currentText = currentText.slice(0, -1);
+                        msgEl.textContent = currentText;
+
+                        // Brief pause, then type correct char
+                        setTimeout(() => {
+                            currentText += char;
+                            msgEl.textContent = currentText;
+                            bossPane.scrollTop = bossPane.scrollHeight;
+                            i++;
+                            setTimeout(typeNext, getDelay(char, nextChar, prevChar));
+                        }, 60 + Math.random() * 40);
+                    }, 150 + Math.random() * 200);
+                    return;
+                }
+
+                currentText += char;
+                msgEl.textContent = currentText;
+                bossPane.scrollTop = bossPane.scrollHeight;
+                i++;
+                setTimeout(typeNext, getDelay(char, nextChar, prevChar));
+            }
+
+            // Initial pause before typing (like focusing on keyboard)
+            setTimeout(typeNext, 400 + Math.random() * 300);
+        }
+
+        // Boss greeting based on evidence count
+        const count = Puzzles.getEvidenceCount();
+        let greeting;
+        if (count === 0) {
+            greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
+        } else if (count < 3) {
+            greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
+        } else if (count < 5) {
+            greeting = `We're building a strong case. ${count} out of 5 pieces so far. Just need ${5 - count} more and we'll have enough to present to the board. You're close.`;
+        } else {
+            greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
+        }
+
+        setTimeout(() => typeMessage(greeting), 800);
+
+        // Handle player messages
+        talkInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && talkInput.value.trim()) {
+                const playerMsg = talkInput.value.trim();
+                talkInput.value = '';
+                
+                const playerEl = document.createElement('div');
+                playerEl.className = 'talk-msg talk-player';
+                playerEl.textContent = `> ${playerMsg}`;
+                bossPane.appendChild(playerEl);
+                bossPane.scrollTop = bossPane.scrollHeight;
+
+                // Boss auto-response
+                setTimeout(() => {
+                    const responses = [
+                        'Copy that. Keep searching.',
+                        'Understood. Focus on the evidence.',
+                        'Roger. Stay on task.',
+                        `We need ${5 - Puzzles.getEvidenceCount()} more pieces. Keep at it.`,
+                        'Check hidden directories. Programmers always hide things.',
+                        'Read everything carefully. Not all evidence is obvious.'
+                    ];
+                    const resp = responses[Math.floor(Math.random() * responses.length)];
+                    typeMessage(resp);
+                }, 1000);
+            }
+        });
+        setTimeout(() => talkInput.focus(), 100);
     }
 
     /* --- CD --- */
@@ -256,12 +433,6 @@ const Terminal = (() => {
         }
 
         appendOutput(output, escapeHtml(node.content));
-
-        // Check for evidence
-        if (Puzzles.checkFileEvidence(node)) {
-            appendOutput(output, `\n<span class="output-success">>>> EVIDENCE FLAG DISCOVERED <<<</span>`);
-            appendOutput(output, `<span class="output-success">Use 'evidence' to view all collected flags.</span>`);
-        }
     }
 
     /* --- GREP --- */
@@ -446,5 +617,11 @@ Launching alignment interface...`);
         if (output) output.innerHTML = '';
     }
 
-    return { spawn, cwd: () => cwd };
+    /* --- PUBLIC: open talk window from outside (auto-open timer) --- */
+    function openTalkReeves() {
+        const dummy = document.createElement('div');
+        cmdTalk(dummy, ['reeves']);
+    }
+
+    return { spawn, cwd: () => cwd, openTalkReeves };
 })();

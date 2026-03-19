@@ -1,62 +1,138 @@
 /* ============================================================
-   PUZZLE ENGINE — Narrative mechanics and evidence tracking
+   PUZZLE ENGINE — Evidence tracking & submission system
+   Project 713: The Nedry Audit
+   ============================================================
+   
+   NEW SYSTEM: Player-driven evidence submission.
+   Files tagged evidence:'critical' are real evidence (5 pieces).
+   Files tagged evidence:'motive' give context but aren't evidence.
+   Files with no tag are irrelevant.
+   
+   Player submits file paths via Evidence Tracker window.
+   Boss responds based on file tag.
    ============================================================ */
 
 const Puzzles = (() => {
-    // Evidence tracking
-    const evidenceFound = {
-        lysine_failure: false,
-        breeding_evidence: false,
-        site_b_location: false,
-        nedry_backdoor: false,
-        biosyn_wire: false
-    };
-
-    const evidenceLabels = {
-        lysine_failure: 'Lysine Contingency Failure',
-        breeding_evidence: 'Unauthorized Breeding',
-        site_b_location: 'Site B Location',
-        nedry_backdoor: "Nedry's Backdoor Code",
-        biosyn_wire: 'BioSyn Wire Transfers'
-    };
-
+    /* ─────── STATE ─────── */
+    let submittedEvidence = [];      // Paths of accepted critical evidence
+    let submittedPaths = new Set();  // All submitted paths (dedup)
     let magicWordActive = false;
     let hasRootAccess = false;
     let decodeActive = false;
     let siteB_decoded = false;
+    const REQUIRED_EVIDENCE = 5;
 
-    function flagEvidence(key) {
-        if (evidenceFound[key]) return false;
-        evidenceFound[key] = true;
-        AudioEngine.playSuccess();
-        return true;
+    /* ─────── EVIDENCE EVALUATION ─────── */
+
+    /**
+     * Evaluate a submitted file path.
+     * Returns { status, response } where status is:
+     *   'critical'  — real evidence, accepted
+     *   'motive'    — circumstantial, not evidence
+     *   'irrelevant'— not useful
+     *   'duplicate' — already submitted
+     *   'not_found' — file doesn't exist
+     *   'directory' — submitted a directory, not a file
+     */
+    function evaluateSubmission(filePath) {
+        const normalizedPath = VFS.normalizePath('/', filePath);
+        
+        // Duplicate check
+        if (submittedPaths.has(normalizedPath)) {
+            return {
+                status: 'duplicate',
+                response: `You already submitted this file. Focus, Contractor.`
+            };
+        }
+
+        // Resolve the file
+        const node = VFS.resolvePath(normalizedPath);
+        if (!node) {
+            return {
+                status: 'not_found',
+                response: `File not found: ${filePath}. Check the path and try again.`
+            };
+        }
+        if (node.type === VFS.DIR) {
+            return {
+                status: 'directory',
+                response: `That's a directory, not a file. Submit specific files as evidence.`
+            };
+        }
+
+        submittedPaths.add(normalizedPath);
+
+        // Evaluate based on evidence tag
+        if (node.evidence === 'critical') {
+            submittedEvidence.push(normalizedPath);
+            const count = submittedEvidence.length;
+            
+            if (count >= REQUIRED_EVIDENCE) {
+                return {
+                    status: 'critical',
+                    response: `Excellent find. This is exactly what we needed.\n\n` +
+                        `>>> ${count}/${REQUIRED_EVIDENCE} EVIDENCE COLLECTED <<<\n\n` +
+                        `That's everything. We have enough for the investigation.\n` +
+                        `Run 'submit_audit' in the terminal to package your findings.`
+                };
+            }
+            return {
+                status: 'critical',
+                response: `Excellent find. Flagging this for the investigation.\n\n` +
+                    `>>> ${count}/${REQUIRED_EVIDENCE} EVIDENCE COLLECTED <<<\n\n` +
+                    `Keep looking. There has to be more.`
+            };
+        }
+
+        if (node.evidence === 'motive') {
+            return {
+                status: 'motive',
+                response: `Interesting context — this shows motive, but it's not direct evidence of a crime. ` +
+                    `We need files that prove criminal activity: communications with accomplices, ` +
+                    `tools used in the attack, plans, that sort of thing. Keep digging.`
+            };
+        }
+
+        // Irrelevant file — boss gets annoyed
+        const fileName = normalizedPath.split('/').pop();
+        const annoyedResponses = [
+            `Why are you sending me this? This is a ${guessFileType(fileName)}. Stop wasting my time, Contractor.`,
+            `This is irrelevant to the investigation. I need evidence of criminal activity, not ${guessFileType(fileName)}s.`,
+            `Contractor, focus. A ${guessFileType(fileName)} is not evidence of espionage. Look for suspicious files — hidden directories, encrypted data, access logs.`,
+            `I'm paying you good money for this audit. Don't send me ${guessFileType(fileName)}s. Find me something damning.`
+        ];
+        const idx = submittedPaths.size % annoyedResponses.length;
+        return {
+            status: 'irrelevant',
+            response: annoyedResponses[idx]
+        };
     }
 
-    function getEvidenceStatus() {
-        const lines = ['═══ EVIDENCE FLAGS ═══\n'];
-        for (const [key, found] of Object.entries(evidenceFound)) {
-            const mark = found ? '■' : '□';
-            const color = found ? 'output-success' : 'output-dim';
-            lines.push(`  <span class="${color}">${mark} ${evidenceLabels[key]}</span>`);
-        }
-        const count = Object.values(evidenceFound).filter(v => v).length;
-        lines.push(`\n  ${count}/5 Evidence Flags collected`);
-        return lines.join('\n');
+    function guessFileType(filename) {
+        if (filename.endsWith('.msg')) return 'personal email';
+        if (filename.endsWith('.txt')) return 'text file';
+        if (filename.endsWith('.log')) return 'routine log file';
+        if (filename.endsWith('.exe')) return 'system executable';
+        if (filename.endsWith('.c')) return 'source code file';
+        if (filename.endsWith('.sh')) return 'shell script';
+        if (filename.endsWith('.dat')) return 'data file';
+        if (filename.endsWith('.vax')) return 'system program';
+        return 'file';
+    }
+
+    function getEvidenceCount() {
+        return submittedEvidence.length;
     }
 
     function allEvidenceFound() {
-        return Object.values(evidenceFound).every(v => v);
+        return submittedEvidence.length >= REQUIRED_EVIDENCE;
     }
 
-    // Check if viewing a file should trigger an evidence flag
-    function checkFileEvidence(node) {
-        if (node && node.evidence) {
-            return flagEvidence(node.evidence);
-        }
-        return false;
+    function getSubmittedEvidence() {
+        return [...submittedEvidence];
     }
 
-    /* --- Magic Word Lockout (corner popup — Image 1 style) --- */
+    /* ─────── MAGIC WORD LOCKOUT ─────── */
     function triggerMagicWord() {
         if (magicWordActive || hasRootAccess) return;
         magicWordActive = true;
@@ -64,7 +140,6 @@ const Puzzles = (() => {
 
         const popup = document.getElementById('magic-word-popup');
         const timerEl = document.getElementById('lockout-timer');
-
         popup.classList.remove('hidden');
 
         let remaining = 30;
@@ -92,13 +167,10 @@ const Puzzles = (() => {
     function canAccessRoot() { return hasRootAccess; }
     function isMagicWordActive() { return magicWordActive; }
 
-    /* --- Decode Puzzle (Hex Alignment) --- */
+    /* ─────── DECODE PUZZLE ─────── */
     function startDecodePuzzle(callback) {
         if (decodeActive) return;
-        if (siteB_decoded) {
-            callback(true);
-            return;
-        }
+        if (siteB_decoded) { callback(true); return; }
         decodeActive = true;
 
         const overlay = document.getElementById('decode-overlay');
@@ -107,14 +179,12 @@ const Puzzles = (() => {
         const statusEl = document.getElementById('decode-status');
         const offsetEl = document.getElementById('decode-offset');
         const resultEl = document.getElementById('decode-result');
-        const controlsEl = document.getElementById('decode-controls');
 
         overlay.classList.remove('hidden');
         resultEl.classList.add('hidden');
         statusEl.classList.remove('aligned');
         statusEl.textContent = 'MISALIGNED';
 
-        // Generate hex streams
         const correctOffset = 7;
         let currentOffset = 0;
 
@@ -164,7 +234,6 @@ const Puzzles = (() => {
         }
         updateStreamB();
 
-        // Scrolling animation for visual effect
         let scrollInterval = setInterval(() => {
             hexLeft.scrollTop += 1;
             hexRight.scrollTop += 1;
@@ -172,22 +241,16 @@ const Puzzles = (() => {
 
         function handleKey(e) {
             if (e.key === 'ArrowUp') {
-                currentOffset++;
-                updateStreamB();
-                AudioEngine.playKeystroke();
-                e.preventDefault();
+                currentOffset++; updateStreamB();
+                AudioEngine.playKeystroke(); e.preventDefault();
             } else if (e.key === 'ArrowDown') {
-                currentOffset--;
-                updateStreamB();
-                AudioEngine.playKeystroke();
-                e.preventDefault();
+                currentOffset--; updateStreamB();
+                AudioEngine.playKeystroke(); e.preventDefault();
             } else if (e.key === 'Enter') {
                 if (currentOffset === correctOffset) {
-                    // Success!
                     clearInterval(scrollInterval);
                     siteB_decoded = true;
                     decodeActive = false;
-                    flagEvidence(VFS.EVIDENCE.SITE_B);
                     resultEl.textContent = `FILE RECOVERY SUCCESSFUL
 Header aligned. Reconstructing data blocks...
 ██████████████████████████████████████████ 100%
@@ -201,7 +264,6 @@ Press ESC to view recovered document.`;
                     resultEl.classList.remove('hidden');
                     AudioEngine.playSuccess();
                     document.removeEventListener('keydown', handleKey);
-                    // Wait for ESC to close
                     function closeOnEsc(e2) {
                         if (e2.key === 'Escape') {
                             overlay.classList.add('hidden');
@@ -224,23 +286,20 @@ Press ESC to view recovered document.`;
                 e.preventDefault();
             }
         }
-
         document.addEventListener('keydown', handleKey);
     }
 
     function isSiteBDecoded() { return siteB_decoded; }
 
-    /* --- Submit Audit Endgame --- */
+    /* ─────── SUBMIT AUDIT ENDGAME ─────── */
     function submitAudit(outputFn) {
         if (!allEvidenceFound()) {
-            const missing = Object.entries(evidenceFound)
-                .filter(([_, v]) => !v)
-                .map(([k, _]) => evidenceLabels[k]);
+            const count = submittedEvidence.length;
             outputFn(`\n<span class="output-error">AUDIT SUBMISSION FAILED</span>
-<span class="output-warning">Missing evidence flags:</span>
-${missing.map(m => '  □ ' + m).join('\n')}
+<span class="output-warning">Insufficient evidence: ${count}/${REQUIRED_EVIDENCE} pieces collected.</span>
 
-Collect all 5 evidence flags before submitting.`);
+Open the Evidence Tracker and submit more file paths.
+Look for hidden directories, suspicious programs, and access logs.`);
             return;
         }
 
@@ -255,12 +314,8 @@ Collect all 5 evidence flags before submitting.`);
             { text: '═══════════════════════════════════════════════', cls: '' },
             { text: '  INGEN DIGITAL FORENSICS — AUDIT SUBMISSION  ', cls: 'output-header' },
             { text: '═══════════════════════════════════════════════\n', cls: '' },
-            { text: 'Packaging evidence flags...', cls: '' },
-            { text: '  ■ Lysine Contingency Failure — CONFIRMED', cls: 'output-success' },
-            { text: '  ■ Unauthorized Breeding — CONFIRMED', cls: 'output-success' },
-            { text: '  ■ Site B Location — CONFIRMED', cls: 'output-success' },
-            { text: "  ■ Nedry's Backdoor Code — CONFIRMED", cls: 'output-success' },
-            { text: '  ■ BioSyn Wire Transfers — CONFIRMED', cls: 'output-success' },
+            { text: 'Packaging evidence...', cls: '' },
+            ...submittedEvidence.map(p => ({ text: `  ■ ${p}`, cls: 'output-success' })),
             { text: '\nGenerating audit report... ████████████ DONE', cls: '' },
             { text: '\nTransmitting to InGen Legal Division...', cls: '' },
             { text: 'TRANSMISSION COMPLETE.\n', cls: 'output-success' },
@@ -277,8 +332,8 @@ Collect all 5 evidence flags before submitting.`);
             { text: '     /dev/sda4/hidden/', cls: 'output-warning' },
             { text: '\n  2. WIPE all primary logs from:', cls: 'corporate-text' },
             { text: '     /sys/logs/', cls: 'output-warning' },
-            { text: '\n  3. PURGE all BioSyn correspondence from:', cls: 'corporate-text' },
-            { text: '     /comms/biosyn/', cls: 'output-warning' },
+            { text: '\n  3. PURGE all evidence from:', cls: 'corporate-text' },
+            { text: '     Nedry\'s workstation', cls: 'output-warning' },
             { text: '\nThis action is necessary to protect InGen', cls: 'corporate-text' },
             { text: 'from insurmountable legal liability.\n', cls: 'corporate-text' },
             { text: 'Your NDA covers everything you have seen.', cls: 'corporate-text' },
@@ -290,8 +345,8 @@ Collect all 5 evidence flags before submitting.`);
             { text: '═══════════════════════════════════════════════', cls: '' },
             { text: '\nExecuting corporate directives...', cls: 'output-warning' },
             { text: '  Moving files to /dev/sda4/hidden/ ... DONE', cls: 'output-dim' },
-            { text: '  Wiping /sys/logs/ ... DONE', cls: 'output-dim' },
-            { text: '  Purging /comms/biosyn/ ... DONE', cls: 'output-dim' },
+            { text: '  Wiping logs ... DONE', cls: 'output-dim' },
+            { text: '  Purging evidence ... DONE', cls: 'output-dim' },
             { text: '  Overwriting free space ... DONE', cls: 'output-dim' },
             { text: '\nAll traces removed.', cls: 'output-warning' },
             { text: 'The official story: nothing happened.\n', cls: 'output-dim' },
@@ -320,11 +375,157 @@ Collect all 5 evidence flags before submitting.`);
         setTimeout(showNext, 500);
     }
 
+    /* ─────── EVIDENCE TRACKER WINDOW ─────── */
+    function openEvidenceTracker() {
+        const win = WindowManager.createWindow('Evidence Tracker', 'evidence', {
+            width: 480, height: 420, singleInstance: 'evidence-tracker'
+        });
+        const body = WindowManager.getBody(win.id);
+        body.classList.add('evidence-tracker-body');
+
+        const count = submittedEvidence.length;
+        body.innerHTML = `
+            <div class="evidence-header">
+                <span class="evidence-title">INGEN FORENSIC EVIDENCE TRACKER</span>
+                <span class="evidence-counter" id="${win.id}-counter">${count}/${REQUIRED_EVIDENCE} Evidence Collected</span>
+            </div>
+            <div class="evidence-submit-bar">
+                <input type="text" class="evidence-input" id="${win.id}-input" 
+                    placeholder="Enter file path (e.g. /usr/nedry/mail/file.msg)" 
+                    autocomplete="off" spellcheck="false">
+                <button class="evidence-btn" id="${win.id}-btn">SUBMIT</button>
+            </div>
+            <div class="evidence-log" id="${win.id}-log">
+                <div class="evidence-log-header">── Submission Log ──</div>
+            </div>`;
+
+        const input = document.getElementById(`${win.id}-input`);
+        const btn = document.getElementById(`${win.id}-btn`);
+        const log = document.getElementById(`${win.id}-log`);
+        const counter = document.getElementById(`${win.id}-counter`);
+
+        function handleSubmit() {
+            const path = input.value.trim();
+            if (!path) return;
+            input.value = '';
+
+            const result = evaluateSubmission(path);
+            const entry = document.createElement('div');
+            entry.className = `evidence-entry evidence-${result.status}`;
+
+            const statusIcons = {
+                critical: '■',
+                motive: '◆',
+                irrelevant: '✗',
+                duplicate: '↻',
+                not_found: '?',
+                directory: '📁'
+            };
+
+            entry.innerHTML = `
+                <div class="evidence-entry-path">${statusIcons[result.status] || '•'} ${path}</div>
+                <div class="evidence-entry-response">${result.response}</div>`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+
+            counter.textContent = `${submittedEvidence.length}/${REQUIRED_EVIDENCE} Evidence Collected`;
+
+            if (result.status === 'critical') {
+                AudioEngine.playSuccess();
+            } else if (result.status === 'irrelevant') {
+                AudioEngine.playError();
+            }
+        }
+
+        btn.addEventListener('click', handleSubmit);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSubmit();
+        });
+        setTimeout(() => input.focus(), 100);
+    }
+
+    /* ─────── MISSION BRIEFING ─────── */
+    function showMissionBriefing() {
+        const overlay = document.createElement('div');
+        overlay.className = 'briefing-overlay';
+        overlay.id = 'mission-briefing';
+        overlay.innerHTML = `
+            <div class="briefing-window">
+                <div class="briefing-titlebar">
+                    <span>📋 INGEN SECURITY — FIELD BRIEF #93-7130</span>
+                </div>
+                <div class="briefing-content">
+                    <pre class="briefing-text">CLASSIFICATION: CONFIDENTIAL
+DISTRIBUTION: CONTRACTOR EYES ONLY
+────────────────────────────────────
+
+Contractor,
+
+You've been brought in to perform a digital
+forensic audit of Workstation NEDRY-WS01.
+
+THE SITUATION:
+  Dennis Nedry, InGen's lead systems programmer,
+  is deceased as of 06/12/1993. On the night of
+  June 11-12, critical security infrastructure
+  failed simultaneously. We don't believe it was
+  a coincidence. Your job is to prove it.
+
+WHAT WE NEED:
+  Evidence of sabotage, espionage, or criminal
+  conspiracy. If Nedry was working with someone,
+  we need to know who, what, and how.
+
+YOUR WORKSTATION:
+  You have full access to Nedry's machine. The
+  filesystem is laid out as follows:
+
+    /sys    System files, park operations
+    /usr    User home directories
+    /lab    Genetics lab & veterinary records
+    /log    System logs, access records
+    /bin    Executables
+    /dev    Hardware interfaces
+    /comms  Communications archives
+
+  Standard Unix tools are at your disposal — ls,
+  cd, cat, grep. Type 'help' if you need a full
+  command reference.
+
+  A skilled programmer wouldn't leave evidence
+  in plain sight. Think about what you'd hide
+  and where you'd hide it. Check permissions,
+  timestamps, anything that looks out of place.
+
+SUBMIT FINDINGS:
+  Open the Evidence Tracker (type 'evidence')
+  and submit file paths as you find them. I'll
+  review each submission and tell you whether
+  it's actionable.
+
+  Don't waste my time with routine files. I
+  need proof, not someone's lunch schedule.
+
+COMMUNICATION:
+  Reach me anytime: type 'talk reeves'
+
+  — M. Reeves
+    InGen Security Division</pre>
+                    <button class="briefing-btn" id="briefing-ack">ACKNOWLEDGED</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        document.getElementById('briefing-ack').addEventListener('click', () => {
+            overlay.remove();
+        });
+    }
+
     return {
-        flagEvidence,
-        getEvidenceStatus,
+        evaluateSubmission,
+        getEvidenceCount,
         allEvidenceFound,
-        checkFileEvidence,
+        getSubmittedEvidence,
         triggerMagicWord,
         tryRootAccess,
         canAccessRoot,
@@ -332,6 +533,8 @@ Collect all 5 evidence flags before submitting.`);
         startDecodePuzzle,
         isSiteBDecoded,
         submitAudit,
-        evidenceFound
+        openEvidenceTracker,
+        showMissionBriefing,
+        REQUIRED_EVIDENCE
     };
 })();
