@@ -14,7 +14,7 @@ const VFS = (() => {
         BREEDING: 'breeding_evidence',
         SITE_B: 'site_b_location',
         BACKDOOR: 'nedry_backdoor',
-        BIOSYN: 'biosyn_wire'
+        BIOSYN: 'biosyn_deal'
     };
 
     // Build the tree
@@ -972,13 +972,13 @@ OFFICIAL TOTAL: 238` }
             usr: { type: DIR, children: {
                 nedry: { type: DIR, children: {
                     'biosyn_comms.dat': { type: FILE, modified: '06/11/1993 23:45', size: '2.8K', evidence: EVIDENCE.BIOSYN, content:
-`*** RECOVERED COMMUNICATION — ENCRYPTED ***
-*** Decryption applied via forensic key recovery ***
+`*** RECOVERED COMMUNICATION — BBS RELAY ***
+*** Decrypted via forensic key recovery ***
 
-FROM: L. Dodgson <dodgson@biosyn.com>
-TO: D. Nedry <dnedry@ingen.net>
+--- BBS DROP MESSAGE (408-555-0147) ---
 DATE: 05/28/1993
-SUBJECT: Final arrangements
+FROM: SYSOP_LD
+TO: NODE_DN
 
 Dennis,
 
@@ -987,12 +987,10 @@ Dock at 0100h on the 12th. Captain says weather
 window is tight — tropical storm approaching
 from the southeast. You'll have maybe 90 minutes.
 
-Payment schedule confirmed:
-  Wire 1: $150,000 — Received (Cayman Acct #4481)
-  Wire 2: $150,000 — Received (Cayman Acct #4481)
-  Wire 3: $200,000 — On delivery of embryos
-  Wire 4: $250,000 — 30 days post-delivery
-  TOTAL:  $750,000
+Re: the second payment — I'll have it on the
+boat. Cash, same as before. $750K in hundreds.
+You hand over the can, I hand over the bag.
+Simple exchange.
 
 The Barbasol can will keep the embryos viable for
 36 hours. That's more than enough time.
@@ -1004,11 +1002,11 @@ cream. Nobody will check.
 
 Don't get nervous. Don't get sloppy.
 
-— Dodgson
+— L.D.
 
 P.S. Nobody cares. Nobody cares.
 
->>> NEDRY'S REPLY (06/01/1993):
+>>> REPLY (06/01/1993) NODE_DN:
 Dodgson, we've got Dodgson here! See, nobody
 cares. Fine. I'll have your embryos. But if
 this goes sideways, I'm gone. I've got the
@@ -1017,7 +1015,7 @@ all of it. 18 minutes and I'm at the dock.
 
 Just have my money ready.
 
-— Nedry` },
+— D.N.` },
 
                     'finance_records.xls': { type: FILE, modified: '06/10/1993 20:15', size: '2.0K', content:
 `PERSONAL FINANCIAL RECORDS — D. Nedry
@@ -1306,64 +1304,94 @@ Spared no expense.
                     }
                 }},
                 biosyn: { type: DIR, children: {
-                    'DODGSON_WIRE_001.DAT': { type: FILE, modified: '04/15/1993 08:00', size: '0.6K', evidence: EVIDENCE.BIOSYN, content:
-`WIRE TRANSFER — INTERCEPTED
-═════════════════════════════
-Bank: First Cayman International
-Account: #4481-7720-3391
-Sender: BioSyn Corp (Cupertino, CA)
-Recipient: Dennis T. Nedry
-Amount: $150,000.00 USD
-Date: 04/15/1993
-Ref: "Consulting fee — Project 713"
+                    'DODGSON_MEET_001.DAT': { type: FILE, modified: '02/12/1993 14:00', size: '0.9K', evidence: EVIDENCE.BIOSYN, content:
+`SECURITY SURVEILLANCE — INTERCEPTED
+═════════════════════════════════════
+Source: San Jose Airport Hotel & Cafe
+Date: 02/12/1993 — 12:30 PM
 
-NOTE: BioSyn has no record of any legitimate
-consulting arrangement with D. Nedry.` },
-                    'DODGSON_WIRE_002.DAT': { type: FILE, modified: '05/20/1993 08:00', size: '0.5K', content:
-`WIRE TRANSFER — INTERCEPTED
-═════════════════════════════
-Bank: First Cayman International
-Account: #4481-7720-3391
-Sender: BioSyn Corp (Cupertino, CA)
-Recipient: Dennis T. Nedry
-Amount: $150,000.00 USD
-Date: 05/20/1993
-Ref: "Consulting fee — Project 713 Phase 2"` },
-                    'DODGSON_WIRE_003.DAT': { type: FILE, modified: '06/13/1993 08:00', size: '0.6K', content:
-`WIRE TRANSFER — INTERCEPTED
-═════════════════════════════
-Bank: First Cayman International
-Account: #4481-7720-3391
-Sender: BioSyn Corp (Cupertino, CA)
-Recipient: Dennis T. Nedry
-Amount: $200,000.00 USD
-Date: [PENDING — NEVER COMPLETED]
-Ref: "Consulting fee — Project 713 Phase 3"
+Subject 1: Lewis Dodgson (BioSyn Genetics)
+Subject 2: Dennis Nedry (InGen Systems)
 
-STATUS: CANCELLED
-  Nedry failed to deliver embryos.
-  BioSyn board notified. Dodgson under review.` },
-                    'PAYMENT_SCHEDULE.XLS': { type: FILE, modified: '04/01/1993 12:00', size: '0.8K', content:
-`BIOSYN CORPORATION — PAYMENT SCHEDULE
+Surveillance notes:
+  Subjects met at rear booth. Dodgson arrived
+  first, wearing hat and sunglasses (possible
+  attempt to avoid recognition).
+
+  Nedry arrived 12:35. Conversation lasted
+  approximately 45 minutes. Dodgson was
+  observed passing a MENU across the table.
+  No menu was used for ordering.
+
+  No electronic payments detected.
+  Meeting appears to be initial recruitment.` },
+                    'DODGSON_MEET_002.DAT': { type: FILE, modified: '04/15/1993 16:00', size: '0.8K', content:
+`SECURITY SURVEILLANCE — INTERCEPTED
+═════════════════════════════════════
+Source: San Jose Airport Hotel & Cafe
+Date: 04/15/1993 — 1:00 PM
+
+Subject 1: Lewis Dodgson (BioSyn Genetics)
+Subject 2: Dennis Nedry (InGen Systems)
+
+Surveillance notes:
+  Second observed meeting, same location.
+  Dodgson carrying a large duffel bag on
+  arrival. Bag was NOT present on departure.
+  Nedry left with bag + a modified Barbasol
+  shaving cream can (confirmed via X-ray
+  at airport security — anomalous internal
+  structure, coolant system detected).
+
+  Cash exchange suspected. No paper trail.
+  Amount unknown — bag appeared heavy.` },
+                    'BBS_INTERCEPT.LOG': { type: FILE, modified: '06/11/1993 22:00', size: '0.7K', content:
+`BBS INTERCEPT — DIAL-UP RELAY
+═════════════════════════════
+Board: 408-555-0147 (Unlisted)
+Capture Date: 06/11/1993
+
+NODE_DN> Package ready. 15 items confirmed.
+NODE_DN> East dock, 0100h. 18 min window.
+SYSOP_LD> Boat confirmed. Captain aware of
+          weather. Will wait 30 min max.
+SYSOP_LD> Second payment on board. Full
+          amount. Cash.
+NODE_DN> Understood. "I'll be back in 15
+         minutes." — alibi for staff.
+SYSOP_LD> Good. Nobody cares.
+NODE_DN> Nobody cares.
+
+--- CONNECTION TERMINATED ---
+
+NOTE: Node identifiers traced to:
+  NODE_DN = Dennis Nedry (InGen workstation)
+  SYSOP_LD = Lewis Dodgson (BioSyn)` },
+                    'DEAL_SUMMARY.TXT': { type: FILE, modified: '06/14/1993 10:00', size: '0.8K', content:
+`INGEN SECURITY — POST-INCIDENT ANALYSIS
 ═══════════════════════════════════════
-Project: 713 (Isla Nublar Acquisition)
-Contractor: D. Nedry
+Re: Nedry/BioSyn Conspiracy
 
-Phase    Amount      Status       Date
-──────────────────────────────────────────
-1        $150,000    PAID         04/15/93
-2        $150,000    PAID         05/20/93
-3        $200,000    PENDING      On delivery
-4        $250,000    PENDING      30 days post
+Deal Structure (Reconstructed):
+  Total agreed payment: $1,500,000 cash
+  $750,000 up front — hand-delivered 04/15/93
+  $750,000 on delivery of embryos
 
-Total:   $750,000
+  All payments in CASH. No bank transfers,
+  no wire activity, no paper trail. Nedry
+  was careful — or Dodgson was.
 
-Authorized by: L. Dodgson, Head of Research
-Approved by: J. Steingarten, BioSyn CFO
+  Cash was likely stored off-site. No large
+  deposits detected in Nedry's known accounts.
 
-NOTE: All payments routed through Cayman
-Islands holding company "TechVentures Ltd."
-to avoid SEC scrutiny.`
+Delivery method: Modified Barbasol can
+  (false bottom, integrated coolant system,
+  capacity: 15 embryo vials, 36hr viability)
+
+Status: FAILED
+  Nedry deceased 06/12/1993.
+  Embryos never delivered.
+  Barbasol can unrecovered (lost in storm).`
                     }
                 }},
                 internal: { type: DIR, children: {
