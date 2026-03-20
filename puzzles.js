@@ -132,26 +132,34 @@ const Puzzles = (() => {
 
     /* ─────── MAGIC WORD LOCKOUT ─────── */
     function triggerMagicWord() {
-        if (magicWordActive || hasRootAccess) return;
-        magicWordActive = true;
-        AudioEngine.playAlert();
+        if (hasRootAccess) return;
 
-        const popup = document.getElementById('magic-word-popup');
-        const timerEl = document.getElementById('lockout-timer');
-        popup.classList.remove('hidden');
+        // Open a new window with the Nedry GIF — just like the movie
+        const win = WindowManager.createWindow('THE KING', 'magic-word', {
+            width: 420, height: 400
+        });
+        const body = WindowManager.getBody(win.id);
+        body.style.background = '#fff';
+        body.style.display = 'flex';
+        body.style.alignItems = 'center';
+        body.style.justifyContent = 'center';
+        body.style.padding = '0';
+        body.innerHTML = `<img src="nedry_king.gif" alt="Ah ah ah" style="max-width:100%;max-height:100%;display:block;" />`;
 
-        let remaining = 30;
-        timerEl.textContent = `LOCKOUT: ${remaining}s`;
+        // Play the audio on loop until the window is closed
+        const audio = new Audio('magic_word.mp3');
+        audio.loop = true;
+        audio.volume = 0.8;
+        audio.play().catch(() => {});
 
-        const interval = setInterval(() => {
-            remaining--;
-            timerEl.textContent = `LOCKOUT: ${remaining}s`;
-            if (remaining <= 0) {
-                clearInterval(interval);
-                popup.classList.add('hidden');
-                magicWordActive = false;
-            }
-        }, 1000);
+        // Stop audio when window is closed
+        const winObj = WindowManager.getWindow(win.id);
+        if (winObj) {
+            winObj.cleanup = () => {
+                audio.pause();
+                audio.currentTime = 0;
+            };
+        }
     }
 
     function tryRootAccess(token) {

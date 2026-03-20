@@ -25,7 +25,55 @@ const App = (() => {
        ══════════════════════════════════════════════════════════ */
 
     async function init() {
+        renderRetroLogo();
         setupLogin();
+    }
+
+    /* --- Render logo as low-res green monochrome bitmap --- */
+    function renderRetroLogo() {
+        const canvas = document.getElementById('login-logo');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            // Preserve aspect ratio
+            const aspect = img.width / img.height;
+            const tinyH = 120;
+            const tinyW = Math.round(tinyH * aspect);
+
+            // Size visible canvas to match aspect ratio
+            const displayH = 240;
+            const displayW = Math.round(displayH * aspect);
+            canvas.width = displayW;
+            canvas.height = displayH;
+            canvas.style.width = displayW + 'px';
+            canvas.style.height = displayH + 'px';
+
+            // Step 1: Draw to a tiny offscreen canvas (low res)
+            const offscreen = document.createElement('canvas');
+            offscreen.width = tinyW;
+            offscreen.height = tinyH;
+            const offCtx = offscreen.getContext('2d');
+            offCtx.drawImage(img, 0, 0, tinyW, tinyH);
+
+            // Step 2: Read pixels and remap to green monochrome
+            const imageData = offCtx.getImageData(0, 0, tinyW, tinyH);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                const lum = (r * 0.299 + g * 0.587 + b * 0.114);
+                data[i]     = lum * 0.15;
+                data[i + 1] = lum * 0.55;
+                data[i + 2] = lum * 0.15;
+                data[i + 3] = a;
+            }
+            offCtx.putImageData(imageData, 0, 0);
+
+            // Step 3: Draw tiny version onto visible canvas (nearest-neighbor upscale)
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = 'jp_logo.png';
     }
 
     function initAudio() {
@@ -45,12 +93,45 @@ const App = (() => {
         const loginBtn = document.getElementById('login-btn');
         const userInput = document.getElementById('login-user');
         const passInput = document.getElementById('login-pass');
+        let loginAttempts = 0;
 
         setTimeout(() => userInput.focus(), 200);
 
         function doLogin() {
             initAudio();
             AudioEngine.playKeystroke();
+
+            const user = userInput.value.trim();
+            const pass = passInput.value;
+
+            // Validate credentials
+            if (user !== 'admin' || pass !== 'Themagicword') {
+                loginAttempts++;
+                // Show error feedback
+                const warning = document.getElementById('login-warning');
+                const origText = warning.textContent;
+                warning.style.color = 'var(--crt-red)';
+                warning.style.textShadow = '0 0 8px rgba(255, 50, 50, 0.5)';
+                if (loginAttempts >= 3) {
+                    warning.textContent = 'ACCESS DENIED — REPEATED FAILURES LOGGED';
+                } else {
+                    warning.textContent = 'ACCESS DENIED — INVALID CREDENTIALS';
+                }
+                passInput.value = '';
+                userInput.style.borderColor = 'var(--crt-red)';
+                passInput.style.borderColor = 'var(--crt-red)';
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    warning.textContent = origText;
+                    warning.style.color = '';
+                    warning.style.textShadow = '';
+                    userInput.style.borderColor = '';
+                    passInput.style.borderColor = '';
+                }, 2000);
+                return;
+            }
+
+            // Successful login
             const loginScreen = document.getElementById('login-screen');
             loginScreen.style.transition = 'opacity 0.6s ease';
             loginScreen.style.opacity = '0';
@@ -96,6 +177,7 @@ const App = (() => {
         const desktop = document.getElementById('desktop');
         desktop.classList.remove('hidden');
         setupDesktopIcons();
+        setupSystemMenu();
         startClock();
         AudioEngine.startServerHum();
 
@@ -132,6 +214,44 @@ const App = (() => {
                     case 'open-telemetry': openTelemetry(); break;
                 }
             });
+        });
+    }
+
+    /* ── System Menu ── */
+    function setupSystemMenu() {
+        const startBtn = document.getElementById('start-button');
+        let menuEl = null;
+
+        startBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Toggle
+            if (menuEl) { menuEl.remove(); menuEl = null; return; }
+
+            menuEl = document.createElement('div');
+            menuEl.className = 'system-menu';
+            menuEl.innerHTML = `
+                <div class="sys-menu-item" data-action="terminal">▣ Terminal</div>
+                <div class="sys-menu-item" data-action="camera">📹 Camera Feed</div>
+                <div class="sys-menu-item" data-action="explorer">📁 File Explorer</div>
+                <div class="sys-menu-divider"></div>
+                <div class="sys-menu-item" data-action="talk">💬 Talk to Reeves</div>`;
+            document.getElementById('taskbar').appendChild(menuEl);
+
+            menuEl.querySelectorAll('.sys-menu-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const action = item.dataset.action;
+                    if (action === 'terminal') openTerminalImageStyle();
+                    else if (action === 'camera') openCameraFeedImageStyle();
+                    else if (action === 'explorer') openExplorerGeneric('/');
+                    else if (action === 'talk') Terminal.openTalkReeves();
+                    menuEl.remove(); menuEl = null;
+                });
+            });
+        });
+
+        // Close menu on outside click
+        document.addEventListener('click', () => {
+            if (menuEl) { menuEl.remove(); menuEl = null; }
         });
     }
 
@@ -247,22 +367,12 @@ const App = (() => {
     }
 
     /* ══════════════════════════════════════════════════════════
-       6. FILE NAVIGATOR / DOCUMENT VIEWER (Image 2 match)
-       - Navy title bar: "FILE NAVIGATOR - [D:\INGEN_CENTRAL\...]"
-       - Menu bar: File Edit View Options Window Help
-       - Toolbar: ⬆ Up + search bar
-       - Left sidebar: folder tree
-       - Center: doc viewer with green text on dark bg
-       - Status bar: Ready | items | Free: 1.44MB | CAPS | NUM
+       6. FILE NAVIGATOR / DOCUMENT VIEWER
        ══════════════════════════════════════════════════════════ */
 
     function openFileNavigator(path) {
-        const node = VFS.resolvePath(path);
-        if (!node || node.type === VFS.DIR) return;
-        const filename = path.split('/').pop();
-
-        const win = WindowManager.createWindow('FILE NAVIGATOR - [D:\\INGEN_CENTRAL\\INTERNAL_DRIVES]', 'docviewer', {
-            width: 750, height: 550,
+        const win = WindowManager.createWindow('FILE NAVIGATOR - [D:\\\\INGEN_CENTRAL\\\\INTERNAL_DRIVES]', 'docviewer', {
+            width: 700, height: 480,
             titlebarClass: 'navy', titleIcon: '📋'
         });
         const el = document.getElementById(win.id);
@@ -271,63 +381,143 @@ const App = (() => {
 
         const body = WindowManager.getBody(win.id);
 
-        // Format document content
-        let docContent;
-        if (node.corrupted) {
-            docContent = `<span class="output-warning">${escapeHtml(node.content)}</span>`;
-        } else {
-            docContent = formatDocContent(node.content == null ? '' : node.content);
+        let currentPath = '/';
+        const initNode = VFS.resolvePath(path);
+        if (initNode) {
+            currentPath = path;
         }
 
-        // Build sidebar tree matching Image 2
-        const sidebarTree = buildSidebarTree(path);
-
-        // Count items in parent directory
-        const parentPath = path.split('/').slice(0, -1).join('/') || '/';
-        const parentNode = VFS.resolvePath(parentPath);
-        const itemCount = parentNode ? VFS.listDir(parentNode).length : 0;
-
+        // Simple shell: path bar + content area + statusbar
         body.innerHTML = `
-            <div class="fn-menubar">
-                <span class="fn-menu-item"><u>F</u>ile</span>
-                <span class="fn-menu-item"><u>E</u>dit</span>
-                <span class="fn-menu-item"><u>V</u>iew</span>
-                <span class="fn-menu-item"><u>O</u>ptions</span>
-                <span class="fn-menu-item"><u>W</u>indow</span>
-                <span class="fn-menu-item"><u>H</u>elp</span>
-            </div>
             <div class="fn-toolbar">
-                <button class="fn-toolbar-btn">⬆ Up</button>
+                <button class="fn-toolbar-btn" id="${win.id}-up-btn">⬆ Up</button>
                 <div class="fn-searchbar">
-                    <span class="fn-search-icon">🔍</span>
-                    <input class="fn-search-input" value="Project 713" readonly>
+                    <span class="fn-search-icon">📂</span>
+                    <input class="fn-search-input" id="${win.id}-pathbar" value="" readonly>
                 </div>
             </div>
-            <div class="fn-main">
-                <div class="fn-sidebar">${sidebarTree}</div>
-                <div class="fn-doc-area">
-                    <div class="fn-doc-header">
-                        <span>DOCUMENT VIEWER - [${escapeHtml(filename.toUpperCase())}]</span>
-                        <span>Ln 1, Col 1</span>
-                    </div>
-                    <div class="fn-doc-content">${docContent}</div>
-                </div>
-            </div>
+            <div class="fn-doc-area" id="${win.id}-doc-area" style="flex:1;"></div>
             <div class="fn-statusbar">
-                <span class="fn-status-cell fn-status-flex">Ready</span>
-                <span class="fn-status-cell fn-status-green">${itemCount} items found</span>
+                <span class="fn-status-cell fn-status-flex" id="${win.id}-status">Ready</span>
+                <span class="fn-status-cell fn-status-green" id="${win.id}-itemcount"></span>
                 <span class="fn-status-cell">Free: 1.44MB</span>
                 <span class="fn-status-cell">CAPS</span>
                 <span class="fn-status-cell">NUM</span>
             </div>`;
 
-        // Sidebar click: highlight active item
-        body.querySelectorAll('.fn-sidebar-item').forEach(item => {
-            item.addEventListener('click', () => {
-                body.querySelectorAll('.fn-sidebar-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
+        // Up button
+        document.getElementById(`${win.id}-up-btn`).addEventListener('click', () => {
+            const parentPath = currentPath.split('/').slice(0, -1).join('/') || '/';
+            navigateTo(parentPath);
         });
+
+        function navigateTo(navPath) {
+            const node = VFS.resolvePath(navPath);
+            if (!node) return;
+
+            currentPath = navPath || '/';
+
+            // Update path bar
+            const displayPath = currentPath === '/' ? 'C:\\' : 'C:\\' + currentPath.replace(/^\//, '').replace(/\//g, '\\');
+            document.getElementById(`${win.id}-pathbar`).value = displayPath;
+
+            // Render doc area
+            const docArea = document.getElementById(`${win.id}-doc-area`);
+            if (node.type === VFS.DIR) {
+                renderFolderContents(node, navPath, docArea);
+            } else {
+                renderFileContent(node, navPath, docArea);
+            }
+        }
+
+        function renderFolderContents(node, folderPath, docArea) {
+            const entries = VFS.listDir(node);
+            const itemCount = entries ? entries.length : 0;
+            document.getElementById(`${win.id}-itemcount`).textContent = `${itemCount} items`;
+
+            let html = `<div class="fn-doc-header">
+                <span>${escapeHtml((folderPath === '/' ? 'C:\\' : folderPath.split('/').pop().toUpperCase()))}</span>
+                <span>${itemCount} items</span>
+            </div>
+            <div class="fn-detail-list">
+                <div class="fn-detail-header-row">
+                    <span class="fn-detail-name">Name</span>
+                    <span class="fn-detail-size">Size</span>
+                    <span class="fn-detail-date">Modified</span>
+                    <span class="fn-detail-type">Type</span>
+                </div>`;
+
+            // Parent directory entry
+            if (folderPath !== '/') {
+                html += `<div class="fn-detail-row" data-path="__parent__" data-type="dir">
+                    <span class="fn-detail-name">..</span>
+                    <span class="fn-detail-size"></span>
+                    <span class="fn-detail-date"></span>
+                    <span class="fn-detail-type">&lt;DIR&gt;</span>
+                </div>`;
+            }
+
+            if (entries) {
+                entries.forEach(entry => {
+                    const entryPath = folderPath === '/' ? '/' + entry.name : folderPath + '/' + entry.name;
+                    const typeLabel = entry.type === VFS.DIR ? '<DIR>' : 'FILE';
+                    const size = entry.type === VFS.DIR ? '' : (entry.size || '—');
+                    const modified = entry.modified || '';
+                    html += `<div class="fn-detail-row" data-path="${escapeHtml(entryPath)}" data-type="${entry.type}">
+                        <span class="fn-detail-name">${escapeHtml(entry.name)}</span>
+                        <span class="fn-detail-size">${size}</span>
+                        <span class="fn-detail-date">${modified}</span>
+                        <span class="fn-detail-type">${typeLabel}</span>
+                    </div>`;
+                });
+            }
+
+            html += '</div>';
+            docArea.innerHTML = html;
+
+            // Wire up double-click to navigate
+            docArea.querySelectorAll('.fn-detail-row').forEach(item => {
+                item.addEventListener('dblclick', () => {
+                    const clickPath = item.dataset.path;
+                    if (clickPath === '__parent__') {
+                        const parentPath = folderPath.split('/').slice(0, -1).join('/') || '/';
+                        navigateTo(parentPath);
+                    } else {
+                        navigateTo(clickPath);
+                    }
+                });
+                // Single click highlights
+                item.addEventListener('click', () => {
+                    docArea.querySelectorAll('.fn-detail-row').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+                });
+            });
+        }
+
+        function renderFileContent(node, filePath, docArea) {
+            const filename = filePath.split('/').pop();
+            const parentPath = filePath.split('/').slice(0, -1).join('/') || '/';
+            const parentNode = VFS.resolvePath(parentPath);
+            const itemCount = parentNode ? VFS.listDir(parentNode).length : 0;
+            document.getElementById(`${win.id}-itemcount`).textContent = `${itemCount} items`;
+
+            let docContent;
+            if (node.corrupted) {
+                docContent = `<span class="output-warning">${escapeHtml(node.content)}</span>`;
+            } else {
+                docContent = formatDocContent(node.content == null ? '' : node.content);
+            }
+
+            docArea.innerHTML = `
+                <div class="fn-doc-header">
+                    <span>DOCUMENT VIEWER - [${escapeHtml(filename.toUpperCase())}]</span>
+                    <span>Ln 1, Col 1</span>
+                </div>
+                <div class="fn-doc-content">${docContent}</div>`;
+        }
+
+        // Initial navigation
+        navigateTo(currentPath);
     }
 
     /** Format document content with classified header styling */
@@ -337,38 +527,6 @@ const App = (() => {
             /(\*{3}\s*TOP SECRET.*?\*{3})/g,
             '<span class="doc-classified">$1</span>'
         );
-        return html;
-    }
-
-    /** Build sidebar folder tree matching Image 2's left panel */
-    function buildSidebarTree(currentPath) {
-        const rootEntries = VFS.listDir(VFS.fs);
-        let html = '<div class="fn-sidebar-item fn-sidebar-root"><span class="fn-sidebar-icon">💻</span>(C:) System</div>';
-
-        rootEntries.forEach(e => {
-            const isActive = currentPath.startsWith('/' + e.name);
-            const icon = e.type === VFS.DIR ? '📁' : '📄';
-            const truncName = e.name.length > 12 ? e.name.substring(0, 11) + '_' : e.name;
-            html += `<div class="fn-sidebar-item${isActive ? ' active' : ''}" data-path="/${e.name}">
-                <span class="fn-sidebar-icon">${icon}</span>${truncName}
-            </div>`;
-
-            // Show children of active branch
-            if (isActive && e.type === VFS.DIR) {
-                const children = VFS.resolvePath('/' + e.name);
-                if (children && children.children) {
-                    const childEntries = VFS.listDir(children);
-                    childEntries.slice(0, 5).forEach(c => {
-                        const cIcon = c.type === VFS.DIR ? '📁' : '📄';
-                        const cName = c.name.length > 10 ? c.name.substring(0, 9) + '_' : c.name;
-                        html += `<div class="fn-sidebar-item fn-sidebar-child" data-path="/${e.name}/${c.name}">
-                            <span class="fn-sidebar-icon">${cIcon}</span>${cName}
-                        </div>`;
-                    });
-                }
-            }
-        });
-
         return html;
     }
 
@@ -386,8 +544,8 @@ const App = (() => {
             titlebarClass: 'dark', titleIcon: '▣'
         });
         const el = document.getElementById(win.id);
-        el.style.left = '280px';
-        el.style.top = '300px';
+        el.style.left = '80px';
+        el.style.top = '130px';
 
         // Terminal.spawn sets up interactive shell (creates its own HTML)
         Terminal.spawn(win.id);

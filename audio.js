@@ -25,119 +25,66 @@ const AudioEngine = (() => {
         return !!ctx;
     }
 
-    /* --- Modem Handshake (10 seconds) --- */
+    /* --- Modem Handshake (subtle background texture) --- */
     function playModemHandshake(duration = 10) {
         if (!ensureContext()) return Promise.resolve();
 
         return new Promise(resolve => {
             const now = ctx.currentTime;
             const masterGain = ctx.createGain();
-            masterGain.gain.setValueAtTime(0.12, now);
+            masterGain.gain.setValueAtTime(0.07, now);
             masterGain.connect(ctx.destination);
 
-            // Phase 1: Dial tone (0-1.5s)
-            const dialOsc = ctx.createOscillator();
-            dialOsc.type = 'sine';
-            dialOsc.frequency.setValueAtTime(350, now);
-            const dialOsc2 = ctx.createOscillator();
-            dialOsc2.type = 'sine';
-            dialOsc2.frequency.setValueAtTime(440, now);
+            // Phase 1: Brief dial tone (0 – 1s)
+            const dial1 = ctx.createOscillator();
+            const dial2 = ctx.createOscillator();
+            dial1.type = 'sine'; dial2.type = 'sine';
+            dial1.frequency.setValueAtTime(350, now);
+            dial2.frequency.setValueAtTime(440, now);
             const dialGain = ctx.createGain();
-            dialGain.gain.setValueAtTime(0.5, now);
-            dialGain.gain.linearRampToValueAtTime(0, now + 1.5);
-            dialOsc.connect(dialGain);
-            dialOsc2.connect(dialGain);
+            dialGain.gain.setValueAtTime(0.3, now);
+            dialGain.gain.linearRampToValueAtTime(0, now + 1.0);
+            dial1.connect(dialGain); dial2.connect(dialGain);
             dialGain.connect(masterGain);
-            dialOsc.start(now);
-            dialOsc2.start(now);
-            dialOsc.stop(now + 1.5);
-            dialOsc2.stop(now + 1.5);
+            dial1.start(now); dial2.start(now);
+            dial1.stop(now + 1.0); dial2.stop(now + 1.0);
 
-            // Phase 2: Carrier detect beeps (1.5-3s)
-            for (let i = 0; i < 4; i++) {
-                const beep = ctx.createOscillator();
-                beep.type = 'square';
-                beep.frequency.setValueAtTime(1200 + i * 200, now + 1.5 + i * 0.35);
-                const beepGain = ctx.createGain();
-                beepGain.gain.setValueAtTime(0.3, now + 1.5 + i * 0.35);
-                beepGain.gain.linearRampToValueAtTime(0, now + 1.5 + i * 0.35 + 0.25);
-                beep.connect(beepGain);
-                beepGain.connect(masterGain);
-                beep.start(now + 1.5 + i * 0.35);
-                beep.stop(now + 1.5 + i * 0.35 + 0.3);
-            }
-
-            // Phase 3: Handshake screech (3-7s)
-            const noiseLen = ctx.sampleRate * 4;
-            const noiseBuffer = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
-            const noiseData = noiseBuffer.getChannelData(0);
+            // Phase 2: Soft negotiation noise (1.5 – 4s)
+            const noiseLen = ctx.sampleRate * 3;
+            const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+            const noiseData = noiseBuf.getChannelData(0);
             for (let i = 0; i < noiseLen; i++) {
-                noiseData[i] = (Math.random() * 2 - 1) * 0.4;
+                noiseData[i] = (Math.random() * 2 - 1) * 0.3;
             }
             const noiseNode = ctx.createBufferSource();
-            noiseNode.buffer = noiseBuffer;
-
+            noiseNode.buffer = noiseBuf;
             const noiseFilter = ctx.createBiquadFilter();
             noiseFilter.type = 'bandpass';
-            noiseFilter.frequency.setValueAtTime(1000, now + 3);
-            noiseFilter.frequency.linearRampToValueAtTime(2400, now + 5);
-            noiseFilter.frequency.linearRampToValueAtTime(1800, now + 7);
-            noiseFilter.Q.setValueAtTime(5, now + 3);
-
+            noiseFilter.frequency.setValueAtTime(1800, now + 1.5);
+            noiseFilter.Q.setValueAtTime(3, now + 1.5);
             const noiseGain = ctx.createGain();
-            noiseGain.gain.setValueAtTime(0.6, now + 3);
-            noiseGain.gain.linearRampToValueAtTime(0.3, now + 7);
-
+            noiseGain.gain.setValueAtTime(0, now + 1.5);
+            noiseGain.gain.linearRampToValueAtTime(0.4, now + 2.0);
+            noiseGain.gain.setValueAtTime(0.3, now + 3.5);
+            noiseGain.gain.linearRampToValueAtTime(0, now + 4.5);
             noiseNode.connect(noiseFilter);
             noiseFilter.connect(noiseGain);
             noiseGain.connect(masterGain);
-            noiseNode.start(now + 3);
-            noiseNode.stop(now + 7);
+            noiseNode.start(now + 1.5);
+            noiseNode.stop(now + 4.5);
 
-            // Frequency sweep oscillator layered on top
-            const sweepOsc = ctx.createOscillator();
-            sweepOsc.type = 'sawtooth';
-            sweepOsc.frequency.setValueAtTime(300, now + 3);
-            sweepOsc.frequency.exponentialRampToValueAtTime(2400, now + 5);
-            sweepOsc.frequency.exponentialRampToValueAtTime(600, now + 7);
-            const sweepGain = ctx.createGain();
-            sweepGain.gain.setValueAtTime(0.15, now + 3);
-            sweepGain.gain.linearRampToValueAtTime(0.05, now + 7);
-            sweepOsc.connect(sweepGain);
-            sweepGain.connect(masterGain);
-            sweepOsc.start(now + 3);
-            sweepOsc.stop(now + 7);
+            // Phase 3: Carrier settle (4.5 – 5s)
+            const carrier = ctx.createOscillator();
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(1200, now + 4.5);
+            const carrierGain = ctx.createGain();
+            carrierGain.gain.setValueAtTime(0.15, now + 4.5);
+            carrierGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            carrier.connect(carrierGain);
+            carrierGain.connect(masterGain);
+            carrier.start(now + 4.5);
+            carrier.stop(now + duration);
 
-            // Phase 4: Training sequence (7-9s)
-            const trainOsc = ctx.createOscillator();
-            trainOsc.type = 'square';
-            trainOsc.frequency.setValueAtTime(1650, now + 7);
-            const trainGain = ctx.createGain();
-            // Pulsing
-            for (let t = 0; t < 2; t += 0.1) {
-                trainGain.gain.setValueAtTime(0.2, now + 7 + t);
-                trainGain.gain.setValueAtTime(0.05, now + 7 + t + 0.05);
-            }
-            trainGain.gain.linearRampToValueAtTime(0, now + 9);
-            trainOsc.connect(trainGain);
-            trainGain.connect(masterGain);
-            trainOsc.start(now + 7);
-            trainOsc.stop(now + 9);
-
-            // Phase 5: Connected (9-10s) — steady tone
-            const connOsc = ctx.createOscillator();
-            connOsc.type = 'sine';
-            connOsc.frequency.setValueAtTime(1200, now + 9);
-            const connGain = ctx.createGain();
-            connGain.gain.setValueAtTime(0.15, now + 9);
-            connGain.gain.linearRampToValueAtTime(0, now + 10);
-            connOsc.connect(connGain);
-            connGain.connect(masterGain);
-            connOsc.start(now + 9);
-            connOsc.stop(now + 10);
-
-            // Cleanup
-            masterGain.gain.linearRampToValueAtTime(0, now + duration);
             setTimeout(resolve, duration * 1000);
         });
     }

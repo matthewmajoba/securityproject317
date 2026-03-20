@@ -154,10 +154,15 @@ const Terminal = (() => {
     function cmdLs(output, args) {
         let targetPath = cwd;
         let longFormat = false;
+        let showAll = false;
 
         for (const arg of args) {
-            if (arg === '-l' || arg === '-la' || arg === '-al') longFormat = true;
-            else targetPath = VFS.normalizePath(cwd, arg);
+            if (arg.startsWith('-')) {
+                if (arg.includes('l')) longFormat = true;
+                if (arg.includes('a')) showAll = true;
+            } else {
+                targetPath = VFS.normalizePath(cwd, arg);
+            }
         }
 
         // Check root access
@@ -182,8 +187,7 @@ const Terminal = (() => {
             return;
         }
 
-        // Filter hidden dotfiles unless -a flag is present
-        const showAll = args.some(a => a === '-a' || a === '-la' || a === '-al');
+        // Filter hidden dotfiles unless -a flag is set
         const visibleEntries = showAll ? entries : entries.filter(e => !e.name.startsWith('.'));
 
         if (longFormat) {
@@ -210,6 +214,9 @@ const Terminal = (() => {
     }
 
     /* --- TALK --- */
+    // Persist chat messages across window close/reopen
+    let talkHistory = [];
+
     function cmdTalk(output, args, injectedMessage) {
         if (!args[0] || args[0].toLowerCase() !== 'reeves') {
             appendOutput(output, '<span class="output-dim">Usage: talk reeves</span>');
@@ -241,6 +248,17 @@ const Terminal = (() => {
 
         const bossPane = document.getElementById(`${win.id}-boss`);
         const talkInput = document.getElementById(`${win.id}-input`);
+
+        // Restore previous messages
+        if (talkHistory.length > 0) {
+            talkHistory.forEach(msg => {
+                const el = document.createElement('div');
+                el.className = msg.isPlayer ? 'talk-msg talk-player' : 'talk-msg';
+                el.textContent = msg.text;
+                bossPane.appendChild(el);
+            });
+            bossPane.scrollTop = bossPane.scrollHeight;
+        }
 
         // Type out boss message with natural "jazz" cadence
         // Variable speed: bursts of fast typing, pauses at punctuation,
@@ -289,6 +307,7 @@ const Terminal = (() => {
             function typeNext() {
                 if (i >= text.length) {
                     bossPane.scrollTop = bossPane.scrollHeight;
+                    talkHistory.push({ text: text, isPlayer: false });
                     if (callback) setTimeout(callback, 500);
                     return;
                 }
@@ -336,23 +355,27 @@ const Terminal = (() => {
         // Store reference for external message injection
         activeTalk = { bossPane, typeMessage };
 
-        if (injectedMessage) {
-            // Evidence submission opened this window — skip greeting, just type the response
-            setTimeout(() => typeMessage(injectedMessage), 800);
-        } else {
-            // Player opened it manually or auto-open — show greeting
-            const count = Puzzles.getEvidenceCount();
-            let greeting;
-            if (count === 0) {
-                greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
-            } else if (count < 3) {
-                greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
-            } else if (count < 5) {
-                greeting = `We're building a strong case. Just need a bit more and we'll have enough to present to the board. You're close.`;
+        // Only show greeting / injected message if this is a fresh chat (no history)
+        if (talkHistory.length === 0) {
+            if (injectedMessage) {
+                setTimeout(() => typeMessage(injectedMessage), 800);
             } else {
-                greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
+                const count = Puzzles.getEvidenceCount();
+                let greeting;
+                if (count === 0) {
+                    greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
+                } else if (count < 3) {
+                    greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
+                } else if (count < 5) {
+                    greeting = `We're building a strong case. Just need a bit more and we'll have enough to present to the board. You're close.`;
+                } else {
+                    greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
+                }
+                setTimeout(() => typeMessage(greeting), 800);
             }
-            setTimeout(() => typeMessage(greeting), 800);
+        } else if (injectedMessage) {
+            // History exists but we got a new injected message (e.g. evidence submission)
+            setTimeout(() => typeMessage(injectedMessage), 800);
         }
 
         // Handle player messages
@@ -366,6 +389,7 @@ const Terminal = (() => {
                 playerEl.textContent = `> ${playerMsg}`;
                 bossPane.appendChild(playerEl);
                 bossPane.scrollTop = bossPane.scrollHeight;
+                talkHistory.push({ text: `> ${playerMsg}`, isPlayer: true });
 
                 // Boss auto-response
                 setTimeout(() => {
@@ -387,7 +411,14 @@ const Terminal = (() => {
 
     /* --- CD --- */
     function cmdCd(output, args, windowId) {
-        if (!args[0]) { cwd = '/'; updatePrompt(windowId); return; }
+        if (!args[0]) {
+            // No args = go up one folder
+            if (cwd !== '/') {
+                cwd = cwd.split('/').slice(0, -1).join('/') || '/';
+            }
+            updatePrompt(windowId);
+            return;
+        }
         const target = VFS.normalizePath(cwd, args[0]);
 
         // Check root access
