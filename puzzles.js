@@ -99,15 +99,17 @@ const Puzzles = (() => {
             };
         }
 
-        // Irrelevant file — boss gets annoyed
+        // Irrelevant file — Reeves dismisses this specific file, not files in general
         const fileName = normalizedPath.split('/').pop();
         const annoyedResponses = [
-            `Why are you sending me this? This is a ${guessFileType(fileName)}. Stop wasting my time, Contractor.`,
-            `This is irrelevant to the investigation. I need evidence of criminal activity, not ${guessFileType(fileName)}s.`,
-            `Contractor, focus. A ${guessFileType(fileName)} is not evidence of espionage. Look for suspicious files — hidden directories, encrypted data, access logs.`,
-            `I'm paying you good money for this audit. Don't send me ${guessFileType(fileName)}s. Find me something damning.`
+            `I looked at this. It's routine. Doesn't tell me anything about what Nedry was up to.`,
+            `This is just normal park operations. I need things that tie Nedry to what happened that night.`,
+            `Not what I'm looking for, Contractor. This doesn't connect to the sabotage.`,
+            `I can see what this is. It's not going to help us. Think about what Nedry was hiding and where he'd hide it.`,
+            `Noted, but this is a dead end. Focus on anything that looks like it was deliberately concealed or modified.`,
+            `This doesn't move the needle. I need records of what Nedry did, not what the park was doing.`
         ];
-        const idx = submittedPaths.size % annoyedResponses.length;
+        const idx = Math.floor(Math.random() * annoyedResponses.length);
         return {
             status: 'irrelevant',
             response: annoyedResponses[idx]
