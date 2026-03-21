@@ -456,31 +456,31 @@ const Terminal = (() => {
                 'Root access requires authorization. There should be a token somewhere in the system.',
                 'Can\'t brute force it. You\'ll need to find legitimate credentials somewhere in the files.'
               ]},
-            { keys: ['dock', 'east dock', 'boat', 'escape'],
+            { keys: ['dock', 'east dock'],
               pool: [
-                'The east dock was Nedry\'s exit plan. Check the security logs and comms for details.',
-                'Nedry was headed for the dock when things went wrong. The evidence should show the full plan.',
-                'The dock records might tell us who was waiting on the other end.'
+                'We think the east dock was part of whatever Nedry was planning. See what the logs say.',
+                'Security footage shows Nedry took a vehicle toward the dock the night of the incident. That\'s all we have.',
+                'The dock comes up in a few places. I need you to find out why.'
               ]},
             { keys: ['lab', 'embryo', 'cryo', 'cold storage', 'vial'],
               pool: [
-                'Embryo storage. That\'s what this was all about — 15 species, viable specimens.',
-                'The cryo room is where the embryos were kept. Nedry needed access to that room for the theft.',
-                'Check the lab records. The embryo manifest will show what he was after.'
+                'Cold storage was flagged in the post-incident review. Something may have been accessed or taken.',
+                'There\'s a discrepancy in the lab inventory. That\'s part of what you\'re there to document.',
+                'If the lab files show unauthorized access, that\'s exactly what I need in the report.'
               ]},
 
             // Characters & entities
             { keys: ['nedry', 'dennis', 'programmer'],
               pool: [
-                'Dennis Nedry. Sole systems programmer for the entire park. Brilliant, underpaid, and bitter.',
-                'Nedry built every system on this island. If there\'s a backdoor, he put it there.',
-                'The man wrote two million lines of code for $730K. You can see why he was angry.'
+                'Dennis Nedry. Sole systems programmer. He had access to everything on that system.',
+                'Nedry was responsible for the park\'s entire computing infrastructure. That\'s a lot of access for one person.',
+                'HR flagged him for workplace complaints months ago. That\'s partly why we\'re auditing his workstation.'
               ]},
             { keys: ['dodgson', 'biosyn', 'competitor', 'lewis'],
               pool: [
-                'Lewis Dodgson. BioSyn genetics division. He\'s the one who bankrolled the operation.',
-                'BioSyn wanted the embryos. Dodgson recruited Nedry to steal them. The comms should show the trail.',
-                'Dodgson. Nobody cares. Except we do — finding his connection to Nedry is key evidence.'
+                'That name came up in a background check. I need you to find out what the connection is.',
+                'BioSyn is a competing genetics firm. If there\'s a link between them and Nedry, that\'s what I need documented.',
+                'If you\'re seeing that name in the files, keep digging. That could be significant.'
               ]},
             { keys: ['hammond', 'john', 'ingen', 'boss', 'owner'],
               pool: [
@@ -490,9 +490,9 @@ const Terminal = (() => {
               ]},
             { keys: ['arnold', 'ray', 'chief engineer'],
               pool: [
-                'Ray Arnold. Chief engineer. He tried to reboot the system but... didn\'t make it back.',
-                'Arnold was running damage control after Nedry\'s sabotage. Check the internal comms.',
-                'Arnold\'s emails might give us insight into what he knew about the system vulnerabilities.'
+                'Ray Arnold. Chief engineer. He was on duty during the incident.',
+                'Arnold may have left notes or internal messages that give context. Worth checking.',
+                'Arnold\'s access logs or emails could show what happened from the operations side.'
               ]},
             { keys: ['muldoon', 'game warden', 'hunter', 'raptor', 'velocir'],
               pool: [
@@ -504,15 +504,9 @@ const Terminal = (() => {
             // The deal & money
             { keys: ['money', 'cash', 'payment', '$750', 'million', 'paid', 'salary'],
               pool: [
-                'Follow the money. That\'s always the play. Cash deal — no wire transfers, no paper trail.',
-                'Nedry was paid in cash. Untraceable. But the communications aren\'t.',
-                '$750K up front, $750K on delivery. All cash. Check his personal files for the details.'
-              ]},
-            { keys: ['barbasol', 'shaving cream', 'can', 'embryo theft'],
-              pool: [
-                'Modified Barbasol can. False bottom, built-in coolant — holds 15 vials for 36 hours.',
-                'The can was never recovered. Lost in the storm along with Nedry. But the plan is documented.',
-                'Clever device. Looks like ordinary shaving cream. The design specs might be in his files.'
+                'Follow the money. If there\'s financial irregularity in those files, I need to know about it.',
+                'Any evidence of outside payments or financial arrangements is exactly what we\'re looking for.',
+                'If Nedry was being compensated by someone other than InGen, the files should show it.'
               ]},
 
             // Technical
