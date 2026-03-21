@@ -35,7 +35,16 @@ const Puzzles = (() => {
      *   'directory' — submitted a directory, not a file
      */
     function evaluateSubmission(filePath) {
-        const normalizedPath = VFS.normalizePath('/', filePath);
+        // Sanitize pasted paths — handle Windows-style (C:\sys\park\file),
+        // emoji prefixes (📁 /sys/park/), and trailing slashes
+        let cleaned = filePath.trim();
+        cleaned = cleaned.replace(/^[^\x00-\x7F\s]+\s*/, ''); // strip leading emoji/non-ASCII
+        cleaned = cleaned.replace(/\\/g, '/');                   // backslash → forward slash
+        cleaned = cleaned.replace(/^[A-Za-z]:/, '');             // strip drive letter (C:)
+        cleaned = cleaned.replace(/\/+$/, '');                   // strip trailing slashes
+        if (cleaned && !cleaned.startsWith('/')) cleaned = '/' + cleaned;
+
+        const normalizedPath = VFS.normalizePath('/', cleaned);
         
         // Duplicate check
         if (submittedPaths.has(normalizedPath)) {
@@ -85,9 +94,8 @@ const Puzzles = (() => {
         if (node.evidence === 'motive') {
             return {
                 status: 'motive',
-                response: `Interesting context — this shows motive, but it's not direct evidence of a crime. ` +
-                    `We need files that prove criminal activity: communications with accomplices, ` +
-                    `tools used in the attack, plans, that sort of thing. Keep digging.`
+                response: `Interesting — paints a picture, but it's not proof of anything criminal on its own. ` +
+                    `I need the smoking gun. Comms, tools, plans. Keep digging.`
             };
         }
 
@@ -301,11 +309,15 @@ Press ESC to view recovered document.`;
     function submitAudit(outputFn) {
         if (!allEvidenceFound()) {
             const count = submittedEvidence.length;
-            outputFn(`\n<span class="output-error">AUDIT SUBMISSION FAILED</span>
-<span class="output-warning">Insufficient evidence: ${count}/${REQUIRED_EVIDENCE} pieces collected.</span>
-
-Open the Evidence Tracker and submit more file paths.
-Look for hidden directories, suspicious programs, and access logs.`);
+            let msg;
+            if (count === 0) {
+                msg = `I\'ve got nothing from you yet. I can\'t submit an empty report.\nStart digging through the file system and submit what you find via the Evidence Tracker.`;
+            } else if (count < 3) {
+                msg = `You\'ve sent me a few things but it\'s not enough to build a case.\nKeep looking. Check hidden directories, personal files, access logs.`;
+            } else {
+                msg = `We\'re getting close but there are still gaps in the picture.\nDon\'t stop now. There has to be more on that machine.`;
+            }
+            outputFn(`\n<span class="output-error">AUDIT SUBMISSION REJECTED</span>\n${msg}`);
             return;
         }
 
@@ -340,8 +352,8 @@ Look for hidden directories, suspicious programs, and access logs.`);
             { text: '     /sys/logs/', cls: 'output-warning' },
             { text: '\n  3. PURGE all evidence from:', cls: 'corporate-text' },
             { text: '     Nedry\'s workstation', cls: 'output-warning' },
-            { text: '\nThis action is necessary to protect InGen', cls: 'corporate-text' },
-            { text: 'from insurmountable legal liability.\n', cls: 'corporate-text' },
+            { text: '\nThe Board has determined that these materials', cls: 'corporate-text' },
+            { text: 'constitute an unacceptable liability exposure.\n', cls: 'corporate-text' },
             { text: 'Your NDA covers everything you have seen.', cls: 'corporate-text' },
             { text: 'This workstation will be physically destroyed', cls: 'corporate-text' },
             { text: 'within 48 hours of your departure.\n', cls: 'corporate-text' },

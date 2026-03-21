@@ -1949,53 +1949,53 @@ echo "Go. Now."` },
                         'sys_diag.exe': { type: FILE, modified: '06/05/1993 01:30', size: '42K', evidence: 'critical', content:
 `[BINARY EXECUTABLE — sys_diag.exe]
 ================================================================
-InGen System Diagnostic Tool v3.2
-Author: D. Nedry
-Last Modified: 06/05/1993
+$ nm -C sys_diag.exe
 
-Decompiled routine list:
-  main()
-    ├── cam_loop_inject(sectors=[1,2,3,5,7,8,12])
-    │     → Captures 30s of feed per sector
-    │     → Replays in infinite loop
-    │     → Security monitor shows "live" feed
-    │
-    ├── disable_motion_sensors(sectors=[14,19,22])
-    │     → Sets sensor status to MAINTENANCE
-    │     → Suppresses all alerts
-    │
-    ├── disable_door_access_log()
-    │     → Stops logging service
-    │     → Existing logs: PRESERVED (oversight?)
-    │
-    ├── unlock_embryo_cold_storage()
-    │     → Bypasses keycard requirement
-    │     → Badge entry: OVERRIDE
-    │
-    ├── unlock_east_dock_gate()
-    │     → Bypasses magnetic lock
-    │     → 18-minute window before auto-relock
-    │
-    └── schedule_fence_shutdown(delay=900)
-          → Full perimeter fence shutdown
-          → 15 minute delay after execution
-          → ALL paddocks affected
+0x00401000 T main
+0x00401120 T cam_loop_inject
+0x004012A0 T disable_motion_sensors
+0x00401380 T disable_door_access_log
+0x00401410 T unlock_embryo_cold_storage
+0x004014C0 T unlock_east_dock_gate
+0x00401560 T schedule_fence_shutdown
+0x004015E0 T whiterabbit_trigger
+0x00401680 D sector_list
+0x004016A0 D timer_val
 
-EXECUTION LOG:
-  06/12/1993 00:15 — EXECUTED by user 'nedry'
-  06/12/1993 00:15 — All routines completed
-  06/12/1993 00:33 — Fence shutdown TRIGGERED
+$ strings sys_diag.exe
 
-NOTE: This is NOT a diagnostic tool. This is a
-coordinated security bypass designed to:
-  1. Blind security cameras
-  2. Create an unmonitored path to the East Dock
-  3. Open restricted areas without authorization
-  4. Disable containment fences
+WHTE_RBT.OBJ
+cam_capture -s %d -d 30 -o /tmp/loop_%d.raw
+cam_inject -s %d -i /tmp/loop_%d.raw -loop
+Sectors: 1,2,3,5,7,8,12
+sensor_ctl --disable --sector=%d --reason=MAINTENANCE
+Sectors: 14,19,22
+door_log --stop
+embryo_storage --unlock --bypass-badge
+east_dock_gate --unlock --timer=1080
+fence_ctl --shutdown --delay=900 --all
+white rabbit object
+All systems disengaged.
+Ah ah ah, you didn't say the magic word!
 
->>> TRIGGER CODE: WHTE_RBT.OBJ <<<
+$ cat /var/log/syslog | grep sys_diag
 
-"Ah ah ah, you didn't say the magic word!"` }
+06/12/1993 00:15:02 sys_diag.exe STARTED (uid=nedry)
+06/12/1993 00:15:03 cam_loop_inject: 7 sectors looped
+06/12/1993 00:15:04 disable_motion_sensors: 3 sectors
+06/12/1993 00:15:05 disable_door_access_log: OK
+06/12/1993 00:15:06 unlock_embryo_cold_storage: OVERRIDE
+06/12/1993 00:15:07 unlock_east_dock_gate: timer=1080s
+06/12/1993 00:15:08 schedule_fence_shutdown: delay=900s
+06/12/1993 00:30:08 fence_shutdown: TRIGGERED — ALL
+
+>>> NOTE (R. Arnold): This isn't a diagnostic.
+    I don't know what the hell it is but it touches
+    cameras, motion sensors, door logs, embryo storage,
+    the dock gate, AND the perimeter fences. All in
+    sequence. In three seconds. Nedry compiled this
+    on 06/05. One week before everything went down.
+    Draw your own conclusions.` }
                     }},
 
                     /* ═══════════════════════════════════════════════

@@ -365,9 +365,9 @@ const Terminal = (() => {
                 if (count === 0) {
                     greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
                 } else if (count < 3) {
-                    greeting = `Good work so far, Contractor. ${count} piece${count > 1 ? 's' : ''} submitted. Keep digging. Nedry was the sole systems programmer — if he was planning something, the evidence is on that machine somewhere. Check his personal directories carefully.`;
+                    greeting = `Good work so far, Contractor. I've reviewed what you've sent. Keep digging — Nedry was the sole systems programmer. If he was planning something, the evidence is on that machine. Check his personal directories carefully.`;
                 } else if (count < 5) {
-                    greeting = `We're building a strong case. Just need a bit more and we'll have enough to present to the board. You're close.`;
+                    greeting = `We're building a strong case. I think there's still more to find, but you're getting close. Don't stop now.`;
                 } else {
                     greeting = `That's everything we need, Contractor. Run 'submit_audit' in the terminal to package your findings and transmit them. Outstanding work.`;
                 }
@@ -443,7 +443,7 @@ const Terminal = (() => {
             { keys: ['submit', 'evidence', 'audit', 'submit_audit'],
               pool: [
                 remaining > 0
-                  ? `We need ${remaining} more piece${remaining > 1 ? 's' : ''} of evidence before we can wrap this up.`
+                  ? `We\'re not there yet. I need more before I can close this out.`
                   : 'You\'ve got everything we need. Run "submit_audit" to package your findings.',
                 'When you find something incriminating, the system flags it automatically. Just keep reading.',
                 'Evidence gets logged when you access the right files. You\'re on the right track.'
@@ -720,7 +720,7 @@ const Terminal = (() => {
             'Keep at it. We need this audit wrapped up clean.',
             'You\'re doing fine. Just keep reading.',
             remaining > 0
-              ? `${remaining} more piece${remaining > 1 ? 's' : ''} of evidence. You\'re getting there.`
+              ? 'We need more before I can write this up. Keep at it.'
               : 'You\'ve got what we need. Run "submit_audit" to finish this.'
         ];
         return fallback[Math.floor(Math.random() * fallback.length)];
