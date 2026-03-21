@@ -288,21 +288,8 @@ html, body {
     display: flex; flex-direction: column; justify-content: flex-end;
 }
 
-#boot-system-ready {
-    position: fixed; bottom: 30px; left: 40px;
-    font-family: var(--font-terminal);
-    font-size: 14px; color: var(--crt-green);
-    text-shadow: var(--phosphor-glow);
-    letter-spacing: 2px;
-}
-#boot-system-ready.visible {
-    display: block;
-    animation: system-ready-blink 1s step-end 3;
-}
-@keyframes system-ready-blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
+
+
 
 /* ============================================================
    MAGIC WORD POPUP
@@ -560,7 +547,7 @@ html, body {
 }
 .sec-toolkit-header {
     font-family: var(--font-terminal);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #225588;
     letter-spacing: 1px;
@@ -571,7 +558,7 @@ html, body {
 }
 .sec-toolkit-sub {
     font-family: var(--font-terminal);
-    font-size: 11px;
+    font-size: 13px;
     color: #666;
     margin-bottom: 8px;
 }
@@ -595,7 +582,7 @@ html, body {
     cursor: pointer;
 }
 .sec-btn span {
-    font-size: 10px;
+    font-size: 13px;
     color: #333;
 }
 .sec-btn:hover {
@@ -606,7 +593,7 @@ html, body {
 }
 .sec-toolkit-footer {
     font-family: var(--font-terminal);
-    font-size: 9px;
+    font-size: 11px;
     color: #999;
     margin-top: 8px;
     letter-spacing: 0.5px;

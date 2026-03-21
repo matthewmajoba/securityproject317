@@ -69,7 +69,6 @@ const Boot = (() => {
 
     async function run() {
         const textEl = document.getElementById('boot-text');
-        const systemReadyEl = document.getElementById('boot-system-ready');
         const totalLines = bootLines.length;
 
         // Start modem sound partway through
@@ -92,16 +91,12 @@ const Boot = (() => {
             await sleep(line.delay);
         }
 
-        // Show "System Ready" at bottom-left (like JP movie)
-        systemReadyEl.classList.remove('hidden');
-        systemReadyEl.classList.add('visible');
-        await sleep(2000);
-
-        // Fade out boot screen
+        // Hard cut to black (like real CRT mode switch — no smooth fades in 1993)
+        await sleep(500);
         const bootScreen = document.getElementById('boot-screen');
-        bootScreen.style.transition = 'opacity 0.8s ease';
-        bootScreen.style.opacity = '0';
-        await sleep(800);
+        bootScreen.style.background = '#000';
+        textEl.style.display = 'none';
+        await sleep(400);
         bootScreen.classList.add('hidden');
 
         return true;
