@@ -105,7 +105,7 @@ const App = (() => {
             const pass = passInput.value;
 
             // Validate credentials
-            if (user !== 'admin' || pass !== 'Themagicword') {
+            if (user !== 'admin' || (pass !== 'Themagicword' && pass !== 'NaughtyDog2026')) {
                 loginAttempts++;
                 // Show error feedback
                 const warning = document.getElementById('login-warning');
