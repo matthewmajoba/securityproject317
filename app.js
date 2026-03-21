@@ -296,7 +296,7 @@ const App = (() => {
 
     function openExplorerImageStyle() {
         const win = WindowManager.createWindow('Irix-Explorer: /sys/park/', 'explorer', {
-            width: 650, height: 420, titleIcon: '📁'
+            width: 650, height: 420, titleIcon: '📁', maxInstances: 5
         });
         const el = document.getElementById(win.id);
         el.style.left = '100px';
@@ -308,7 +308,7 @@ const App = (() => {
 
     function openExplorerGeneric(path) {
         const win = WindowManager.createWindow(`Irix-Explorer: ${path}/`, 'explorer', {
-            width: 650, height: 420, titleIcon: '📁'
+            width: 650, height: 420, titleIcon: '📁', maxInstances: 5
         });
         const body = WindowManager.getBody(win.id);
         renderExplorerContents(body, path, win.id);
@@ -632,7 +632,7 @@ const App = (() => {
 
     function openCameraFeedImageStyle() {
         const win = WindowManager.createWindow('FEED: RAPTOR PADDOCK — CAM 01', 'camera', {
-            width: 560, height: 420, titleIcon: '📹'
+            width: 560, height: 420, titleIcon: '📹', singleInstance: 'camera'
         });
         const el = document.getElementById(win.id);
         el.style.left = (window.innerWidth - 580) + 'px';

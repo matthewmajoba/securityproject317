@@ -12,8 +12,20 @@ const WindowManager = (() => {
 
     function createWindow(title, type, opts = {}) {
         const id = 'win-' + (++windowIdCounter);
+
+        // Single instance check — focus existing window if one exists
         const existing = windows.find(w => w.opts && w.opts.singleInstance && w.opts.singleInstance === (opts.singleInstance || null));
         if (existing) { focusWindow(existing.id); return existing; }
+
+        // Max instances check — focus most recent of this type if at limit
+        if (opts.maxInstances) {
+            const ofType = windows.filter(w => w.type === type);
+            if (ofType.length >= opts.maxInstances) {
+                const latest = ofType[ofType.length - 1];
+                focusWindow(latest.id);
+                return latest;
+            }
+        }
 
         const w = document.createElement('div');
         w.className = 'irix-window';
