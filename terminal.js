@@ -391,22 +391,345 @@ const Terminal = (() => {
                 bossPane.scrollTop = bossPane.scrollHeight;
                 talkHistory.push({ text: `> ${playerMsg}`, isPlayer: true });
 
-                // Boss auto-response
+                // Keyword-aware response system
                 setTimeout(() => {
-                    const responses = [
-                        'Copy that. Keep searching.',
-                        'Understood. Focus on the evidence.',
-                        'Roger. Stay on task.',
-                        `We need ${5 - Puzzles.getEvidenceCount()} more pieces. Keep at it.`,
-                        'Check hidden directories. Programmers always hide things.',
-                        'Read everything carefully. Not all evidence is obvious.'
-                    ];
-                    const resp = responses[Math.floor(Math.random() * responses.length)];
+                    const resp = getReevesResponse(playerMsg);
                     typeMessage(resp);
                 }, 1000);
             }
         });
         setTimeout(() => talkInput.focus(), 100);
+    }
+
+    /* ─────── REEVES KEYWORD INTELLIGENCE ─────── */
+    function getReevesResponse(msg) {
+        const m = msg.toLowerCase();
+        const count = Puzzles.getEvidenceCount();
+        const remaining = 5 - count;
+
+        // Keyword → response pools (picks random from matching pool)
+        const rules = [
+            // Terminal commands & navigation
+            { keys: ['how', 'command', 'commands', 'what do i', 'what can i'],
+              pool: [
+                'Type "help" in the terminal. That\'ll show you what you can work with.',
+                'The terminal responds to standard Unix. ls, cd, cat — the basics.',
+                'You\'ve got a full shell at your disposal. Start with "help" if you\'re lost.'
+              ]},
+            { keys: ['ls', 'list', 'files', 'directory', 'folder'],
+              pool: [
+                'Use "ls" to list contents. And remember — not everything is visible by default.',
+                '"ls" shows you what\'s in a directory. Pay attention to what you find.',
+                'Some directories have more than what meets the eye. That\'s all I\'ll say.'
+              ]},
+            { keys: ['hidden', 'invisible', 'can\'t find', 'cant find', 'nothing there', 'empty'],
+              pool: [
+                'Programmers hide things. It\'s what they do.',
+                'If a folder looks empty, maybe you\'re not looking hard enough.',
+                'Not everything is out in the open. Think like a systems programmer.'
+              ]},
+            { keys: ['cd', 'navigate', 'go to', 'move', 'change dir'],
+              pool: [
+                '"cd" followed by the folder name. Standard stuff.',
+                'Navigate with "cd". Use "cd .." to go back up.',
+                'You can move through the file system with "cd". Check every level.'
+              ]},
+            { keys: ['cat', 'read', 'open file', 'view file', 'contents'],
+              pool: [
+                '"cat" followed by the filename. Read everything — details matter.',
+                'Use "cat" to read files. Don\'t skim. Nedry was careful with what he wrote.',
+                'Read the files with "cat". Some of them are long but the details are important.'
+              ]},
+            { keys: ['submit', 'evidence', 'audit', 'submit_audit'],
+              pool: [
+                remaining > 0
+                  ? `We need ${remaining} more piece${remaining > 1 ? 's' : ''} of evidence before we can wrap this up.`
+                  : 'You\'ve got everything we need. Run "submit_audit" to package your findings.',
+                'When you find something incriminating, the system flags it automatically. Just keep reading.',
+                'Evidence gets logged when you access the right files. You\'re on the right track.'
+              ]},
+
+            // Locations & areas
+            { keys: ['root', 'sys/root', 'access denied', 'magic word', 'locked'],
+              pool: [
+                'That area is locked down. Nedry made sure of that. Look for access tokens in the comms.',
+                'Root access requires authorization. There should be a token somewhere in the system.',
+                'Can\'t brute force it. You\'ll need to find legitimate credentials somewhere in the files.'
+              ]},
+            { keys: ['dock', 'east dock', 'boat', 'escape'],
+              pool: [
+                'The east dock was Nedry\'s exit plan. Check the security logs and comms for details.',
+                'Nedry was headed for the dock when things went wrong. The evidence should show the full plan.',
+                'The dock records might tell us who was waiting on the other end.'
+              ]},
+            { keys: ['lab', 'embryo', 'cryo', 'cold storage', 'vial'],
+              pool: [
+                'Embryo storage. That\'s what this was all about — 15 species, viable specimens.',
+                'The cryo room is where the embryos were kept. Nedry needed access to that room for the theft.',
+                'Check the lab records. The embryo manifest will show what he was after.'
+              ]},
+
+            // Characters & entities
+            { keys: ['nedry', 'dennis', 'programmer'],
+              pool: [
+                'Dennis Nedry. Sole systems programmer for the entire park. Brilliant, underpaid, and bitter.',
+                'Nedry built every system on this island. If there\'s a backdoor, he put it there.',
+                'The man wrote two million lines of code for $730K. You can see why he was angry.'
+              ]},
+            { keys: ['dodgson', 'biosyn', 'competitor', 'lewis'],
+              pool: [
+                'Lewis Dodgson. BioSyn genetics division. He\'s the one who bankrolled the operation.',
+                'BioSyn wanted the embryos. Dodgson recruited Nedry to steal them. The comms should show the trail.',
+                'Dodgson. Nobody cares. Except we do — finding his connection to Nedry is key evidence.'
+              ]},
+            { keys: ['hammond', 'john', 'ingen', 'boss', 'owner'],
+              pool: [
+                'Hammond built this place. "Spared no expense" — except on the guy running the entire computer system.',
+                'John Hammond. Visionary or reckless, depending on who you ask. Either way, he underpaid Nedry.',
+                'InGen\'s management is not our concern. Stay focused on Nedry\'s activities.'
+              ]},
+            { keys: ['arnold', 'ray', 'chief engineer'],
+              pool: [
+                'Ray Arnold. Chief engineer. He tried to reboot the system but... didn\'t make it back.',
+                'Arnold was running damage control after Nedry\'s sabotage. Check the internal comms.',
+                'Arnold\'s emails might give us insight into what he knew about the system vulnerabilities.'
+              ]},
+            { keys: ['muldoon', 'game warden', 'hunter', 'raptor', 'velocir'],
+              pool: [
+                'Muldoon knew those raptors were trouble from the start. Smart man.',
+                'The raptors are not our problem. Stay focused on the financial and digital evidence.',
+                'Muldoon\'s reports are in the system somewhere. Might give context but won\'t be evidence.'
+              ]},
+
+            // The deal & money
+            { keys: ['money', 'cash', 'payment', '$750', 'million', 'paid', 'salary'],
+              pool: [
+                'Follow the money. That\'s always the play. Cash deal — no wire transfers, no paper trail.',
+                'Nedry was paid in cash. Untraceable. But the communications aren\'t.',
+                '$750K up front, $750K on delivery. All cash. Check his personal files for the details.'
+              ]},
+            { keys: ['barbasol', 'shaving cream', 'can', 'embryo theft'],
+              pool: [
+                'Modified Barbasol can. False bottom, built-in coolant — holds 15 vials for 36 hours.',
+                'The can was never recovered. Lost in the storm along with Nedry. But the plan is documented.',
+                'Clever device. Looks like ordinary shaving cream. The design specs might be in his files.'
+              ]},
+
+            // Technical
+            { keys: ['backdoor', 'hack', 'bypass', 'virus', 'white_rbt', 'whte_rbt', 'wht_rbt'],
+              pool: [
+                'If Nedry built a backdoor into the system, it would be disguised as something innocent.',
+                'Look for executable files or scripts that don\'t belong on a park management system.',
+                'A backdoor would explain how he planned to disable security. Find it and that\'s major evidence.'
+              ]},
+            { keys: ['camera', 'feed', 'surveillance', 'cctv', 'cam ', 'cams'],
+              pool: [
+                'The cameras are on a fixed automated loop. You can\'t control them from the terminal.',
+                'Camera feeds are automated. They cycle on their own. Nothing you can do about it from here.',
+                'Those feeds run on a hardware loop. There\'s no software override — Nedry saw to that.',
+                'Don\'t worry about the cameras. They\'re on autopilot. Focus on the file system.'
+              ]},
+
+            // Meta / conversational
+            { keys: ['hello', 'hi', 'hey', 'good', 'morning', 'evening'],
+              pool: [
+                'Reeves. Let\'s stay focused.',
+                'Hey. You find something or just checking in?',
+                'Contractor. What have you got?'
+              ]},
+            { keys: ['thanks', 'thank', 'appreciate'],
+              pool: [
+                'Don\'t thank me yet. Thank me when we close this case.',
+                'Save it for the debrief. Keep working.',
+                'Noted. Back to work.'
+              ]},
+            { keys: ['who are you', 'your name', 'about you'],
+              pool: [
+                'M. Reeves. InGen Security Division. That\'s all you need to know.',
+                'Your boss for this contract. That\'s the extent of our relationship.',
+                'I\'m the one who reads your report when this is done. Make it worth reading.'
+              ]},
+            { keys: ['stuck', 'lost', 'confused', 'don\'t know', 'dont know', 'help me', 'what now', 'where'],
+              pool: [
+                'Explore the file system. Start at the top and work your way through every directory.',
+                'You have the whole workstation. Read files, check directories, follow the trail.',
+                'Think like an auditor. Financial records, communications, personal files — it\'s all in there.'
+              ]},
+            { keys: ['hint', 'clue', 'tip'],
+              pool: [
+                'I\'m not here to hold your hand. You were hired because you\'re good at this.',
+                'No hints. Do your job, Contractor.',
+                'You\'ve got a full workstation and a shell. That\'s all the help you need.'
+              ]},
+
+            // Insults & hostility
+            { keys: ['fuck you', 'screw you', 'useless', 'idiot', 'stupid', 'hate you', 'worst', 'suck', 'trash', 'garbage'],
+              pool: [
+                'That kind of language doesn\'t go in the report. Are you done, or do I need to find someone else for this contract?',
+                'I\'ll pretend I didn\'t see that. Get back to work or I\'ll terminate your contract.',
+                'You\'re being paid to do a job, not throw a tantrum. Focus.',
+                'One more outburst like that and this conversation gets logged to HR. Your call.'
+              ]},
+
+            // Fear / panic / dinosaurs
+            { keys: ['scared', 'afraid', 'danger', 'safe', 'die', 'kill', 'eaten', 'attack', 'hear something', 'noise'],
+              pool: [
+                'That\'s not in your job description. You\'re there for the audit. Stay on task.',
+                'The island was evacuated. You\'re there because it\'s empty. Do the work.',
+                'I didn\'t hire you to panic. I hired you to find evidence.',
+                'Stay calm and professional. You have a job to finish.'
+              ]},
+            { keys: ['dinosaur', 'dino', 'trex', 't-rex', 'raptor', 'velociraptor', 'animal', 'creature'],
+              pool: [
+                'The animals aren\'t your department. Your department is Nedry\'s file system.',
+                'I\'m not a wildlife expert. I\'m your boss. Focus on the audit.',
+                'Whatever\'s out there is a security matter, not a forensics matter. Stay on task.'
+              ]},
+
+            // Time / urgency
+            { keys: ['time', 'hurry', 'rush', 'quick', 'fast', 'deadline', 'how long'],
+              pool: [
+                'The sooner you finish the audit, the sooner you\'re off the island. Simple.',
+                'We don\'t have a hard deadline but I\'d rather not drag this out. Work efficiently.',
+                'Move at whatever pace gets results. But don\'t waste time either.'
+              ]},
+
+            // Escape / leaving
+            { keys: ['leave', 'escape', 'get out', 'go home', 'extract', 'pickup', 'pick up', 'boat'],
+              pool: [
+                'You leave when the job\'s done. That was the contract.',
+                'Transport is arranged for when the audit is complete. Not before.',
+                'Finish the work first. Then we\'ll get you off the island.'
+              ]},
+
+            // Goodbye / signing off
+            { keys: ['bye', 'goodbye', 'good bye', 'signing off', 'later', 'gotta go', 'logging off'],
+              pool: [
+                'Reeves out. Don\'t go dark for too long.',
+                'Copy that. Check back when you\'ve got something.',
+                'Understood. Channel stays open when you need it.'
+              ]},
+
+            // Other people on the island
+            { keys: ['anyone else', 'someone here', 'alone', 'people', 'who else', 'other people', 'team'],
+              pool: [
+                'The island was evacuated after the incident. That\'s why you\'re there — uninterrupted access.',
+                'It\'s just you. That was the whole point of sending one contractor.',
+                'You\'re the only person with authorized access right now. Work uninterrupted.'
+              ]},
+
+            // Yes / no / ok (low effort messages)
+            { keys: ['yes', 'yeah', 'yep', 'ok', 'okay', 'sure', 'fine', 'alright', 'copy', 'roger'],
+              pool: [
+                'Good. Get back to it.',
+                'Acknowledged. Keep working.',
+                'Then keep going. I need results, not check-ins.'
+              ]},
+            { keys: ['no', 'nope', 'nah', 'negative'],
+              pool: [
+                'Then figure out what\'s next and get on it.',
+                'Not the answer I was hoping for. Keep looking.',
+                'Alright. Keep digging.'
+              ]},
+
+            // Power / systems status
+            { keys: ['power', 'electric', 'system status', 'systems', 'offline', 'broken', 'working'],
+              pool: [
+                'Systems are degraded but functional. That\'s why you still have a terminal.',
+                'Nedry\'s sabotage knocked out most of the infrastructure. But the workstation\'s running and that\'s what matters.',
+                'If it boots, it works. Don\'t worry about the rest of the park\'s systems.'
+              ]},
+
+            // The park / island
+            { keys: ['park', 'island', 'isla', 'nublar', 'jurassic', 'theme park', 'where am i'],
+              pool: [
+                'Isla Nublar. InGen\'s biological preserve. You read the brief — you know where you are.',
+                'It\'s an island. With dinosaurs. You\'re here for the files, not the tour.',
+                'You\'re at the main operations facility. Everything you need is on this workstation.'
+              ]},
+
+            // Storm / weather
+            { keys: ['storm', 'weather', 'rain', 'hurricane', 'tropical'],
+              pool: [
+                'The storm is why we have this window. Everyone\'s gone, systems are vulnerable. Work fast.',
+                'Tropical storm knocked out the main grid. Nedry used it as cover for the theft.',
+                'Weather\'s not your concern. The workstation has backup power. Keep working.'
+              ]},
+
+            // Nedry's fate
+            { keys: ['dead', 'what happened to nedry', 'nedry die', 'nedry dead', 'killed', 'body'],
+              pool: [
+                'Nedry didn\'t make it to the dock. That\'s all we know. His files are what matter now.',
+                'He\'s gone. What he left behind on this system is what we need to recover.',
+                'Nedry\'s status is irrelevant to the audit. Focus on what\'s on screen.'
+              ]},
+
+            // Asking Reeves to do things
+            { keys: ['can you', 'could you', 'look it up', 'check for me', 'run a', 'do it', 'search for', 'find it'],
+              pool: [
+                'You\'re the one with terminal access. I\'m remote. Do your job.',
+                'I can\'t access the system from here. That\'s why you\'re on site.',
+                'If I could do it from my end, I wouldn\'t have hired you. Get to it.'
+              ]},
+
+            // Player identity
+            { keys: ['who am i', 'my name', 'what\'s my job', 'whats my job', 'my role', 'why am i here'],
+              pool: [
+                'You\'re a contracted forensic auditor. Re-read your briefing if you forgot.',
+                'InGen hired you to audit Nedry\'s system activity. Type "brief" if you need the refresher.',
+                'You\'re a contractor. You audit. That\'s the arrangement.'
+              ]},
+
+            // Non-work chat / small talk
+            { keys: ['how are you', 'what\'s up', 'whats up', 'tell me about', 'fun', 'joke', 'bored', 'interesting'],
+              pool: [
+                'This is a secure channel, not a chat room. Stay on task.',
+                'I\'m not here for conversation. Report findings or get back to work.',
+                'We can talk about whatever you want at the debrief. Right now — the audit.'
+              ]},
+
+            // General profanity (not directed at Reeves)
+            { keys: ['fuck', 'shit', 'damn', 'hell', 'crap', 'wtf', 'what the'],
+              pool: [
+                'Keep the comms professional, Contractor.',
+                'Noted. Channel that energy into the audit.',
+                'Save the commentary. Just report what you find.'
+              ]},
+
+            // Compliments
+            { keys: ['helpful', 'you\'re good', 'nice', 'smart', 'great job', 'love'],
+              pool: [
+                'I\'m not here to be liked. I\'m here to get results. Back to work.',
+                'Save the performance review for after the audit.',
+                'Flattery doesn\'t move the needle. Evidence does.'
+              ]}
+        ];
+
+        // Check each rule
+        for (const rule of rules) {
+            if (rule.keys.some(k => m.includes(k))) {
+                return rule.pool[Math.floor(Math.random() * rule.pool.length)];
+            }
+        }
+
+        // Fallback — generic in-character responses
+        const fallback = [
+            'Copy that. Keep searching.',
+            'Understood. Stay on task.',
+            'Roger. Focus on the evidence.',
+            'Noted. Keep digging through those files.',
+            'I hear you. Let me know when you find something concrete.',
+            'Stay sharp. Nedry was clever — the evidence won\'t be obvious.',
+            'We\'re on the clock, Contractor.',
+            'Acknowledged. Report back when you have something.',
+            'Don\'t get sidetracked. Files, records, communications — that\'s your job.',
+            'Keep at it. We need this audit wrapped up clean.',
+            'You\'re doing fine. Just keep reading.',
+            remaining > 0
+              ? `${remaining} more piece${remaining > 1 ? 's' : ''} of evidence. You\'re getting there.`
+              : 'You\'ve got what we need. Run "submit_audit" to finish this.'
+        ];
+        return fallback[Math.floor(Math.random() * fallback.length)];
     }
 
     /* --- CD --- */
@@ -673,5 +996,5 @@ Launching alignment interface...`);
         cmdTalk(dummy, ['reeves'], message);
     }
 
-    return { spawn, cwd: () => cwd, openTalkReeves };
+    return { spawn, cwd: () => cwd, openTalkReeves, openLedger: cmdLedger };
 })();

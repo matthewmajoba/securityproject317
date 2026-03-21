@@ -212,6 +212,7 @@ const App = (() => {
                     case 'open-terminal': openTerminalImageStyle(); break;
                     case 'open-explorer': openExplorerGeneric(icon.dataset.path || '/'); break;
                     case 'open-telemetry': openTelemetry(); break;
+                    case 'open-security': openSecurityToolkit(); break;
                 }
             });
         });
@@ -252,6 +253,35 @@ const App = (() => {
         // Close menu on outside click
         document.addEventListener('click', () => {
             if (menuEl) { menuEl.remove(); menuEl = null; }
+        });
+    }
+
+    /* ── InGen Security Toolkit ── */
+    function openSecurityToolkit() {
+        const win = WindowManager.createWindow('InGen Security — Toolkit', 'security', {
+            width: 340, height: 300, titleIcon: '🛡️', singleInstance: 'security-toolkit'
+        });
+        const body = WindowManager.getBody(win.id);
+        body.classList.add('security-toolkit-body');
+        body.innerHTML = `
+            <div class="sec-toolkit-header">INGEN SECURITY DIVISION</div>
+            <div class="sec-toolkit-sub">Forensic Audit Tools</div>
+            <div class="sec-toolkit-grid">
+                <button class="sec-btn" data-tool="brief">📋<span>Mission Brief</span></button>
+                <button class="sec-btn" data-tool="evidence">🔍<span>Evidence Tracker</span></button>
+                <button class="sec-btn" data-tool="talk">💬<span>Contact Reeves</span></button>
+                <button class="sec-btn" data-tool="ledger">📓<span>Audit Ledger</span></button>
+            </div>
+            <div class="sec-toolkit-footer">Authorized Personnel Only</div>`;
+
+        body.querySelectorAll('.sec-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tool = btn.dataset.tool;
+                if (tool === 'brief') Puzzles.showMissionBriefing();
+                else if (tool === 'evidence') Puzzles.openEvidenceTracker();
+                else if (tool === 'talk') Terminal.openTalkReeves();
+                else if (tool === 'ledger') Terminal.openLedger();
+            });
         });
     }
 
@@ -579,9 +609,11 @@ const App = (() => {
         'cam_frame_04.png', 'cam_frame_05.png', 'cam_frame_06.png',
         'cam_frame_07.png'
     ];
-    const CAM_DINO_FRAME = 'cam_frame_dino.png';
-    const CAM_CYCLE_LENGTH = 30;      // Total frames in one full cycle
-    const CAM_DINO_POSITION = 24;     // Frame 24 shows the dinosaur
+    const CAM_RAPTOR_FRAME_1 = 'cam_frame_raptor1.png';
+    const CAM_RAPTOR_FRAME_2 = 'cam_frame_raptor2.png';
+    const CAM_CYCLE_LENGTH = 46;      // Total frames in one full cycle
+    const CAM_RAPTOR_POS_1 = 23;      // Frame 23: first raptor shadow
+    const CAM_RAPTOR_POS_2 = 46;      // Frame 46: second raptor shadow
     const CAM_FRAME_RATE_MS = 6000;   // 1 frame every 6 seconds
     let camFrameIndex = 0;
     let nextStaticFrame = Math.floor(Math.random() * 8) + 8;
@@ -589,17 +621,17 @@ const App = (() => {
 
     // Camera labels — each frame can show a different camera
     const CAM_LABELS = [
-        'EAST DOCK — CAM 01',
-        'MAINT ROAD — CAM 04',
+        'RAPTOR PADDOCK — CAM 01',
         'EAST DOCK — CAM 02',
-        'PERIMETER W — CAM 07',
-        'DOCK GATE — CAM 03',
-        'MAINT BAY — CAM 05',
-        'EAST DOCK — CAM 01'
+        'VISITOR CENTER — CAM 03',
+        'T-REX PADDOCK — CAM 04',
+        'PERIMETER GATE — CAM 05',
+        'JUNGLE ROAD — CAM 06',
+        'MAINT SHED — CAM 07'
     ];
 
     function openCameraFeedImageStyle() {
-        const win = WindowManager.createWindow('FEED: EAST DOCK — CAM 01', 'camera', {
+        const win = WindowManager.createWindow('FEED: RAPTOR PADDOCK — CAM 01', 'camera', {
             width: 560, height: 420, titleIcon: '📹'
         });
         const el = document.getElementById(win.id);
@@ -609,6 +641,8 @@ const App = (() => {
         const body = WindowManager.getBody(win.id);
         body.innerHTML = `<div class="cam-body">
             <img src="${CAM_FRAMES[0]}" alt="Security Camera" class="cam-image" id="cam-feed-img">
+            <div class="cam-interlace"></div>
+            <div class="cam-grain"></div>
             <div class="cam-static" id="cam-static"></div>
             <div class="cam-rec">REC ●</div>
             <div class="cam-timestamp" id="cam-timestamp">06/12/1993 21:04:00</div>
@@ -616,7 +650,8 @@ const App = (() => {
 
         // Preload all frames for smooth cycling
         CAM_FRAMES.forEach(f => { const img = new Image(); img.src = f; });
-        const dinoImg = new Image(); dinoImg.src = CAM_DINO_FRAME;
+        const r1 = new Image(); r1.src = CAM_RAPTOR_FRAME_1;
+        const r2 = new Image(); r2.src = CAM_RAPTOR_FRAME_2;
 
         // Start frame cycling
         camFrameIndex = 0;
@@ -641,11 +676,14 @@ const App = (() => {
 
             // Determine which frame to show
             const cyclePos = camFrameIndex % CAM_CYCLE_LENGTH;
-            if (cyclePos === CAM_DINO_POSITION) {
-                // Show the dinosaur shadow frame
-                imgEl.src = CAM_DINO_FRAME;
+            if (cyclePos === CAM_RAPTOR_POS_1) {
+                // Subtle raptor shadow — first appearance
+                imgEl.src = CAM_RAPTOR_FRAME_1;
+            } else if (cyclePos === 0 && camFrameIndex > 0) {
+                // Position 46 (cycle reset) — second raptor shadow
+                imgEl.src = CAM_RAPTOR_FRAME_2;
             } else {
-                // Pick a base frame (cycle through the 7 with slight randomness)
+                // Pick a base frame (cycle through the 7 locations)
                 const baseIdx = cyclePos % CAM_FRAMES.length;
                 imgEl.src = CAM_FRAMES[baseIdx];
             }

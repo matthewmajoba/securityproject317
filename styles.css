@@ -532,6 +532,83 @@ html, body {
     color: #fff;
 }
 
+.icon-shield {
+    width: 40px; height: 46px;
+    background: linear-gradient(180deg, #3388cc 0%, #225588 100%);
+    clip-path: polygon(50% 0%, 100% 20%, 100% 65%, 50% 100%, 0% 65%, 0% 20%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+}
+.icon-shield::after {
+    content: '★';
+    font-size: 20px;
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+}
+
+/* ── Security Toolkit Panel ── */
+.security-toolkit-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    gap: 8px;
+    background: var(--win-face);
+}
+.sec-toolkit-header {
+    font-family: var(--font-terminal);
+    font-size: 14px;
+    font-weight: bold;
+    color: #225588;
+    letter-spacing: 1px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--win-dark);
+    width: 100%;
+    text-align: center;
+}
+.sec-toolkit-sub {
+    font-family: var(--font-terminal);
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+}
+.sec-toolkit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+}
+.sec-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    font-family: var(--font-terminal);
+    font-size: 20px;
+    background: var(--win-face);
+    border: 2px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+    cursor: pointer;
+}
+.sec-btn span {
+    font-size: 10px;
+    color: #333;
+}
+.sec-btn:hover {
+    background: #ddd;
+}
+.sec-btn:active {
+    border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+}
+.sec-toolkit-footer {
+    font-family: var(--font-terminal);
+    font-size: 9px;
+    color: #999;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+}
+
 /* ============================================================
    WINDOW SYSTEM — Windows 3.1 Beveled Gray
    ============================================================ */
@@ -957,24 +1034,76 @@ html, body {
    ============================================================ */
 .cam-body {
     height: 100%; position: relative;
-    background: #111; overflow: hidden;
+    background: #000; overflow: hidden;
 }
 .cam-image {
     width: 100%; height: 100%;
     object-fit: cover;
-    filter: grayscale(40%) contrast(1.1) brightness(0.8);
-    opacity: 0.85;
+    /* Full B&W, crushed contrast, slight blur to kill sharpness */
+    filter: grayscale(100%) contrast(1.4) brightness(0.7) blur(0.4px);
+    opacity: 0.80;
 }
-/* Very subtle scanline on camera */
+
+/* ── Heavy scan lines (visible horizontal bars) ── */
 .cam-body::before {
     content: ''; position: absolute; top: 0; left: 0;
     width: 100%; height: 100%; pointer-events: none;
     background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
+        0deg,
+        transparent 0px,
+        transparent 1px,
+        rgba(0, 0, 0, 0.25) 1px,
+        rgba(0, 0, 0, 0.25) 2px
     );
     z-index: 2;
 }
+
+/* ── Dark vignette corners + subtle noise grain ── */
+.cam-body::after {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; pointer-events: none;
+    background:
+        radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+    z-index: 3;
+}
+
+/* ── Rolling interlace bar (moves down the screen) ── */
+.cam-body .cam-interlace {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 8px;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255,255,255,0.04) 40%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.04) 60%,
+        transparent 100%
+    );
+    z-index: 4; pointer-events: none;
+    animation: interlace-roll 4s linear infinite;
+}
+@keyframes interlace-roll {
+    0% { top: -8px; }
+    100% { top: 100%; }
+}
+
+/* ── Film grain / noise texture ── */
+.cam-body .cam-grain {
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
+    z-index: 5; pointer-events: none;
+    opacity: 0.5;
+    animation: grain-shift 0.3s steps(4) infinite;
+}
+@keyframes grain-shift {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2%, -1%); }
+    50% { transform: translate(1%, 2%); }
+    75% { transform: translate(-1%, -2%); }
+    100% { transform: translate(2%, 1%); }
+}
+
 /* Static noise overlay (toggled via JS) */
 .cam-static {
     position: absolute; top: 0; left: 0;
@@ -982,7 +1111,7 @@ html, body {
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect fill="%23fff" opacity="0.04" x="0" y="0" width="1" height="1"/><rect fill="%23fff" opacity="0.04" x="1" y="1" width="1" height="1"/></svg>');
     background-size: 4px 4px;
     opacity: 0;
-    z-index: 4;
+    z-index: 6;
     transition: opacity 0.1s;
     pointer-events: none;
 }
@@ -992,7 +1121,7 @@ html, body {
     position: absolute; top: 6px; right: 8px;
     font-family: var(--font-terminal); font-size: 12px;
     color: var(--crt-red); text-shadow: 0 0 4px rgba(255,50,50,0.6);
-    z-index: 3;
+    z-index: 7;
     animation: rec-blink 1s infinite;
 }
 @keyframes rec-blink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0; } }
@@ -1001,13 +1130,7 @@ html, body {
     position: absolute; bottom: 6px; left: 8px;
     font-family: var(--font-terminal); font-size: 10px;
     color: #ccc; text-shadow: 0 0 2px rgba(0,0,0,0.8);
-    z-index: 3;
-}
-
-.cam-body::after {
-    content: ''; position: absolute; bottom: 0; left: 0;
-    width: 100%; height: 2px;
-    background: var(--crt-green); z-index: 3;
+    z-index: 7;
 }
 
 /* ============================================================
