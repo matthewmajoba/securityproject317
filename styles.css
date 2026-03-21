@@ -288,17 +288,20 @@ html, body {
     display: flex; flex-direction: column; justify-content: flex-end;
 }
 
-#boot-progress-bar {
-    margin-top: 20px; height: 8px;
-    background: var(--bg-panel); border: 1px solid var(--border-green);
-    overflow: hidden;
+#boot-system-ready {
+    position: fixed; bottom: 30px; left: 40px;
+    font-family: var(--font-terminal);
+    font-size: 14px; color: var(--crt-green);
+    text-shadow: var(--phosphor-glow);
+    letter-spacing: 2px;
 }
-
-#boot-progress-fill {
-    height: 100%; width: 0%;
-    background: var(--crt-green);
-    box-shadow: var(--phosphor-glow);
-    transition: width 0.3s ease;
+#boot-system-ready.visible {
+    display: block;
+    animation: system-ready-blink 1s step-end 3;
+}
+@keyframes system-ready-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 /* ============================================================

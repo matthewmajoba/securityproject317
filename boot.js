@@ -64,12 +64,12 @@ const Boot = (() => {
         { text: '  Clearance: Level 4 — Full System Access', delay: 80, cls: 'text-amber' },
         { text: '════════════════════════════════════════════════════', delay: 80, cls: 'text-amber' },
         { text: '', delay: 200 },
-        { text: 'System ready. Loading desktop environment...', delay: 600, cls: 'output-success' },
+        { text: 'Loading desktop environment...', delay: 600, cls: 'output-success' },
     ];
 
     async function run() {
         const textEl = document.getElementById('boot-text');
-        const fillEl = document.getElementById('boot-progress-fill');
+        const systemReadyEl = document.getElementById('boot-system-ready');
         const totalLines = bootLines.length;
 
         // Start modem sound partway through
@@ -89,14 +89,15 @@ const Boot = (() => {
             span.textContent = line.text + '\n';
             textEl.appendChild(span);
 
-            // Update progress bar
-            fillEl.style.width = ((i + 1) / totalLines * 100) + '%';
-
             await sleep(line.delay);
         }
 
+        // Show "System Ready" at bottom-left (like JP movie)
+        systemReadyEl.classList.remove('hidden');
+        systemReadyEl.classList.add('visible');
+        await sleep(2000);
+
         // Fade out boot screen
-        await sleep(500);
         const bootScreen = document.getElementById('boot-screen');
         bootScreen.style.transition = 'opacity 0.8s ease';
         bootScreen.style.opacity = '0';
