@@ -365,7 +365,7 @@ const Terminal = (() => {
                 if (count === 0) {
                     greeting = `Reeves here. Find anything yet? That workstation should have plenty to dig through. Remember — look for hidden files, suspicious programs, anything that doesn't belong on a park management system. Use 'ls -a' to check for hidden directories.`;
                 } else if (count < 3) {
-                    greeting = `Good work so far, Contractor. I've reviewed what you've sent. Keep digging — Nedry was the sole systems programmer. If he was planning something, the evidence is on that machine. Check his personal directories carefully.`;
+                    greeting = `Good work so far, Contractor. I've reviewed what you've sent. Keep digging — Nedry was the sole systems programmer. If he was planning something, it would be on that machine. Check his personal directories carefully.`;
                 } else if (count < 5) {
                     greeting = `We're building a strong case. I think there's still more to find, but you're getting close. Don't stop now.`;
                 } else {
@@ -452,13 +452,13 @@ const Terminal = (() => {
             // Locations & areas
             { keys: ['root', 'sys/root', 'access denied', 'magic word', 'locked'],
               pool: [
-                'That area is locked down. Nedry made sure of that. Look for access tokens in the comms.',
+                'That area is locked down tight. Look for access tokens in the comms.',
                 'Root access requires authorization. There should be a token somewhere in the system.',
                 'Can\'t brute force it. You\'ll need to find legitimate credentials somewhere in the files.'
               ]},
             { keys: ['dock', 'east dock'],
               pool: [
-                'We think the east dock was part of whatever Nedry was planning. See what the logs say.',
+                'The east dock keeps coming up. Footage shows Nedry headed that direction. See what the logs say about why.',
                 'Security footage shows Nedry took a vehicle toward the dock the night of the incident. That\'s all we have.',
                 'The dock comes up in a few places. I need you to find out why.'
               ]},
@@ -514,13 +514,13 @@ const Terminal = (() => {
               pool: [
                 'If Nedry built a backdoor into the system, it would be disguised as something innocent.',
                 'Look for executable files or scripts that don\'t belong on a park management system.',
-                'A backdoor would explain how he planned to disable security. Find it and that\'s major evidence.'
+                'If Nedry built a backdoor, that would explain a lot. Find it and that\'s the case right there.'
               ]},
             { keys: ['camera', 'feed', 'surveillance', 'cctv', 'cam ', 'cams'],
               pool: [
                 'The cameras are on a fixed automated loop. You can\'t control them from the terminal.',
                 'Camera feeds are automated. They cycle on their own. Nothing you can do about it from here.',
-                'Those feeds run on a hardware loop. There\'s no software override — Nedry saw to that.',
+                'Those feeds run on a hardware loop. No software override from this terminal.',
                 'Don\'t worry about the cameras. They\'re on autopilot. Focus on the file system.'
               ]},
 
@@ -630,7 +630,7 @@ const Terminal = (() => {
             { keys: ['power', 'electric', 'system status', 'systems', 'offline', 'broken', 'working'],
               pool: [
                 'Systems are degraded but functional. That\'s why you still have a terminal.',
-                'Nedry\'s sabotage knocked out most of the infrastructure. But the workstation\'s running and that\'s what matters.',
+                'Something knocked out most of the infrastructure the night of the incident. The workstation\'s running though, and that\'s what matters.',
                 'If it boots, it works. Don\'t worry about the rest of the park\'s systems.'
               ]},
 
@@ -646,14 +646,14 @@ const Terminal = (() => {
             { keys: ['storm', 'weather', 'rain', 'hurricane', 'tropical'],
               pool: [
                 'The storm is why we have this window. Everyone\'s gone, systems are vulnerable. Work fast.',
-                'Tropical storm knocked out the main grid. Nedry used it as cover for the theft.',
+                'Tropical storm knocked out the main grid. Convenient timing for whoever caused the incident.',
                 'Weather\'s not your concern. The workstation has backup power. Keep working.'
               ]},
 
             // Nedry's fate
             { keys: ['dead', 'what happened to nedry', 'nedry die', 'nedry dead', 'killed', 'body'],
               pool: [
-                'Nedry didn\'t make it to the dock. That\'s all we know. His files are what matter now.',
+                'Nedry didn\'t make it off the island. That\'s all we know. His files are what matter now.',
                 'He\'s gone. What he left behind on this system is what we need to recover.',
                 'Nedry\'s status is irrelevant to the audit. Focus on what\'s on screen.'
               ]},
@@ -713,7 +713,7 @@ const Terminal = (() => {
             'Roger. Focus on the evidence.',
             'Noted. Keep digging through those files.',
             'I hear you. Let me know when you find something concrete.',
-            'Stay sharp. Nedry was clever — the evidence won\'t be obvious.',
+            'Stay sharp. If there\'s something here, it won\'t be sitting in plain sight.',
             'We\'re on the clock, Contractor.',
             'Acknowledged. Report back when you have something.',
             'Don\'t get sidetracked. Files, records, communications — that\'s your job.',

@@ -104,8 +104,8 @@ const Puzzles = (() => {
         const annoyedResponses = [
             `I looked at this. It's routine. Doesn't tell me anything about what Nedry was up to.`,
             `This is just normal park operations. I need things that tie Nedry to what happened that night.`,
-            `Not what I'm looking for, Contractor. This doesn't connect to the sabotage.`,
-            `I can see what this is. It's not going to help us. Think about what Nedry was hiding and where he'd hide it.`,
+            `Not what I'm looking for, Contractor. I don't see how this connects to the incident.`,
+            `I can see what this is. It's not going to help us. If Nedry was trying to cover his tracks, think about where he'd do it.`,
             `Noted, but this is a dead end. Focus on anything that looks like it was deliberately concealed or modified.`,
             `This doesn't move the needle. I need records of what Nedry did, not what the park was doing.`
         ];
